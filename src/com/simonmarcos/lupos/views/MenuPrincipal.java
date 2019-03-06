@@ -1142,8 +1142,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
         btnConfirm.setBackground(new java.awt.Color(0, 153, 204));
         btnConfirm.setFont(new java.awt.Font("Arial", 1, 36)); // NOI18N
+        btnConfirm.setForeground(new java.awt.Color(255, 255, 255));
         btnConfirm.setText("CONFIRMAR");
-        btnConfirm.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        btnConfirm.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         btnConfirm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnConfirmActionPerformed(evt);
@@ -1168,8 +1169,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
         jButton1.setBackground(new java.awt.Color(0, 153, 204));
         jButton1.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
         jButton1.setText("ACTUALZIAR");
-        jButton1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jButton1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -1192,6 +1194,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         lblCutsDraw.setText("jLabel9");
 
         lblEarningsTotal.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblEarningsTotal.setForeground(new java.awt.Color(204, 0, 0));
         lblEarningsTotal.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblEarningsTotal.setText("jLabel9");
         lblEarningsTotal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 0, 0), 2));
@@ -1202,6 +1205,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         lblCutsAdult.setText("jLabel9");
 
         lblEarnings.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblEarnings.setForeground(new java.awt.Color(204, 0, 0));
         lblEarnings.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblEarnings.setText("jLabel9");
         lblEarnings.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 0, 0), 2));
@@ -1434,6 +1438,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         this.setearTableBarberCuts();
+        this.fillListAllBarber();
+        this.fillListAllClient();
         this.fillTableBarberCuts();
         this.fillTableBarberHairCutsToday();
     }//GEN-LAST:event_jButton1ActionPerformed

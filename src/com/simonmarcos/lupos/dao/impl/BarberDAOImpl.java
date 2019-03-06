@@ -213,7 +213,7 @@ public class BarberDAOImpl implements DAOBarber {
         List<Barber> list = null;
         if (c != null) {
             try {
-                String consultaSQL = "SELECT name,lastName FROM Barber";
+                String consultaSQL = "SELECT idBarber,name,lastName FROM Barber";
 
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ResultSet rs = ps.executeQuery();
@@ -221,6 +221,7 @@ public class BarberDAOImpl implements DAOBarber {
                 list = new ArrayList<>();
                 while (rs.next()) {
                     Barber b = new Barber();
+                    b.setIdBarber(rs.getInt("idBarber"));
                     b.setName(rs.getString("name"));
                     b.setLastName(rs.getString("lastName"));
                     list.add(b);
