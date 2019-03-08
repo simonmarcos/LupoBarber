@@ -10,71 +10,90 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-public class MenuHairCutsClient extends javax.swing.JDialog {
+public class MenuHairCutsBarber extends javax.swing.JDialog {
 
     private DefaultTableModel dtm = null;
     private List<HairCut> listHairCut;
     private List<HairCut> listHairCutFinal;
-    private String idClient = "";
+    private String idBarber = "";
 
-    public MenuHairCutsClient(java.awt.Frame parent, boolean modal, String idClient) {
+    public MenuHairCutsBarber(java.awt.Frame parent, boolean modal, String idBarber) {
         super(parent, modal);
         initComponents();
         this.setFocusable(true);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setTitle("Menu Cortes de Pelos");
-        this.idClient = idClient;
+        this.idBarber = idBarber;
         this.setearTableHairCuts();
-        this.getAllHairCutsDeterminateClient();
-        this.requestFocus();
+        this.getAllHairCutsDeterminateBarber();
+        this.setearRowWithFinalDate();
     }
 
     //_____________________ METODOS PARA MANIPULAR LA TABLA DE CORTE DE PELOS __________________________
     private void setearTableHairCuts() {
         dtm = new DefaultTableModel();
-        String[] columns = {"Fecha Corte", "Barbero", "Tipo Corte", "Precio"};
+        String[] columns = {"Fecha Corte", "Cliente", "Tipo Corte", "Precio"};
         dtm.setColumnIdentifiers(columns);
-        tableHairCutsClient.setModel(dtm);
+        tableHairCutsBarber.setModel(dtm);
 
         //Codigo para aplicarle el formato personalizado al encabezado
-        JTableHeader jth = tableHairCutsClient.getTableHeader();
+        JTableHeader jth = tableHairCutsBarber.getTableHeader();
         jth.setDefaultRenderer(new HeaderManagement());
-        tableHairCutsClient.setTableHeader(jth);
+        tableHairCutsBarber.setTableHeader(jth);
 
         //Codigo para aplicarme los formatos personalizados
-        tableHairCutsClient.getColumnModel().getColumn(0).setCellRenderer(new CellManagement());
-        tableHairCutsClient.getColumnModel().getColumn(1).setCellRenderer(new CellManagement());
-        tableHairCutsClient.getColumnModel().getColumn(2).setCellRenderer(new CellManagement());
-        tableHairCutsClient.getColumnModel().getColumn(3).setCellRenderer(new CellManagement());
+        tableHairCutsBarber.getColumnModel().getColumn(0).setCellRenderer(new CellManagement());
+        tableHairCutsBarber.getColumnModel().getColumn(1).setCellRenderer(new CellManagement());
+        tableHairCutsBarber.getColumnModel().getColumn(2).setCellRenderer(new CellManagement());
+        tableHairCutsBarber.getColumnModel().getColumn(3).setCellRenderer(new CellManagement());
 
         //Codigo para especificar el tamaño de las celdas
-        tableHairCutsClient.setRowHeight(25);
+        tableHairCutsBarber.setRowHeight(25);
         //Codigo para no poder escribir las celdas
-        tableHairCutsClient.setDefaultEditor(Object.class, null);
+        tableHairCutsBarber.setDefaultEditor(Object.class, null);
     }
 
-    //Metodo que me obtendra todos los clientes de la DB y lo almacena en una variable global
-    private void getAllHairCutsDeterminateClient() {
+    //Metodo que me agregara los resultados finales en la ultima fila de la tabla
+    private void setearRowWithFinalDate() {
+
+        int row = tableHairCutsBarber.getRowCount();
+        double priceHairCuts = 0;
+        for (int i = 0; i < row; i++) {
+            priceHairCuts += Double.parseDouble(tableHairCutsBarber.getValueAt(i, 3).toString());
+        }
+
+        String[] fila = new String[4];
+        fila[0] = "";
+        fila[1] = "";
+        fila[2] = "Ganancias Total";
+        fila[3] = "$ " + String.valueOf(priceHairCuts);
+
+        dtm.addRow(fila);
+        tableHairCutsBarber.setModel(dtm);
+    }
+
+    //Metodo que me obtendra todos los barberos de la DB y lo almacena en una variable global
+    private void getAllHairCutsDeterminateBarber() {
         DAOHairCut dao = new HairCutDAOImpl();
-        listHairCut = dao.queryFilter(Integer.parseInt(idClient.trim()), "Cliente");
+        listHairCut = dao.queryFilter(Integer.parseInt(idBarber.trim()), "Barbero");
         fillTableListHairCuts(listHairCut);
         lblCountCuts.setText("Cortes realizados: " + listHairCut.size());
     }
 
     //Metodo que me rellena la tabla, donde recibe una lista con los clientes.
     private void fillTableListHairCuts(List<HairCut> list) {
-        if (list.size() > 0) {
+        if (list.size() > 0 || list != null) {
             String[] fila = new String[4];
             list.stream().forEach(hairCut -> {
                 fila[0] = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(hairCut.getDate());
                 fila[1] = hairCut.getBarber().getLastName() + " " + hairCut.getBarber().getName();
                 fila[2] = hairCut.getCuts();
-                fila[3] = String.valueOf("$ " + hairCut.getPrice());
+                fila[3] = String.valueOf(hairCut.getPrice());
 
                 dtm.addRow(fila);
             });
-            tableHairCutsClient.setModel(dtm);
+            tableHairCutsBarber.setModel(dtm);
             lblCountCuts.setText("Cortes realizados: " + list.size());
         }
     }
@@ -110,17 +129,34 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
         this.fillTableListHairCuts(listHairCutFinal);
     }
 
+    //Metodo que me buscara el barbero dependiendo la fecha de corte
+    private void getListForDateSinceAndUntil() {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String dateSinceString = sdf.format(dateSince.getDate());
+        String dateUntilString = sdf.format(dateUntil.getDate());
+
+        DAOHairCut dao = new HairCutDAOImpl();
+
+        this.setearTableHairCuts();
+        this.fillTableListHairCuts(dao.queryFilterForDateBetwen(Integer.parseInt(idBarber), dateSinceString, dateUntilString));
+
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        txtSearchClient = new javax.swing.JTextField();
+        txtSearchBarber = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         lblCountCuts = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tableHairCutsClient = new javax.swing.JTable();
+        tableHairCutsBarber = new javax.swing.JTable();
+        dateUntil = new com.toedter.calendar.JDateChooser();
+        dateSince = new com.toedter.calendar.JDateChooser();
+        btnSearchBarberDate = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -131,23 +167,23 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
             }
         });
 
-        txtSearchClient.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
-        txtSearchClient.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtSearchClient.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 204), 2));
-        txtSearchClient.addActionListener(new java.awt.event.ActionListener() {
+        txtSearchBarber.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        txtSearchBarber.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtSearchBarber.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 204), 2));
+        txtSearchBarber.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtSearchClientActionPerformed(evt);
+                txtSearchBarberActionPerformed(evt);
             }
         });
-        txtSearchClient.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearchBarber.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtSearchClientKeyTyped(evt);
+                txtSearchBarberKeyTyped(evt);
             }
         });
 
         jLabel1.setFont(new java.awt.Font("Arial", 3, 20)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("INGRESE NOMBRE/APELLIDO");
+        jLabel1.setText("INGRESE NOMBRE/APELLIDO/CORTE");
         jLabel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         lblCountCuts.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
@@ -166,7 +202,7 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(txtSearchClient, javax.swing.GroupLayout.DEFAULT_SIZE, 463, Short.MAX_VALUE)))
+                        .addComponent(txtSearchBarber)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -174,7 +210,7 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(22, 22, 22)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtSearchClient, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSearchBarber, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCountCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -183,8 +219,8 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        tableHairCutsClient.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        tableHairCutsClient.setModel(new javax.swing.table.DefaultTableModel(
+        tableHairCutsBarber.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        tableHairCutsBarber.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {},
                 {},
@@ -195,17 +231,41 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
 
             }
         ));
-        jScrollPane1.setViewportView(tableHairCutsClient);
+        jScrollPane1.setViewportView(tableHairCutsBarber);
+
+        dateSince.setDateFormatString("dd/MM/yyyy");
+
+        btnSearchBarberDate.setText("BUSCAR");
+        btnSearchBarberDate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchBarberDateActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 891, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGap(57, 57, 57)
+                .addComponent(dateSince, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(61, 61, 61)
+                .addComponent(btnSearchBarberDate, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(dateUntil, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(61, 61, 61))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(dateSince, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(dateUntil, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnSearchBarberDate, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -226,26 +286,33 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtSearchClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchClientActionPerformed
-        this.filterTableHairCuts(txtSearchClient.getText());
-    }//GEN-LAST:event_txtSearchClientActionPerformed
+    private void txtSearchBarberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchBarberActionPerformed
+        this.filterTableHairCuts(txtSearchBarber.getText());
+    }//GEN-LAST:event_txtSearchBarberActionPerformed
 
     private void jPanel1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jPanel1KeyTyped
 
     }//GEN-LAST:event_jPanel1KeyTyped
 
-    private void txtSearchClientKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchClientKeyTyped
-        filterTableHairCuts(txtSearchClient.getText());
-    }//GEN-LAST:event_txtSearchClientKeyTyped
+    private void txtSearchBarberKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchBarberKeyTyped
+        filterTableHairCuts(txtSearchBarber.getText());
+    }//GEN-LAST:event_txtSearchBarberKeyTyped
+
+    private void btnSearchBarberDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchBarberDateActionPerformed
+        this.getListForDateSinceAndUntil();
+    }//GEN-LAST:event_btnSearchBarberDateActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnSearchBarberDate;
+    private com.toedter.calendar.JDateChooser dateSince;
+    private com.toedter.calendar.JDateChooser dateUntil;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCountCuts;
-    private javax.swing.JTable tableHairCutsClient;
-    private javax.swing.JTextField txtSearchClient;
+    private javax.swing.JTable tableHairCutsBarber;
+    private javax.swing.JTextField txtSearchBarber;
     // End of variables declaration//GEN-END:variables
 }

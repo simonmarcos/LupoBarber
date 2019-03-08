@@ -7,7 +7,6 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -149,6 +148,15 @@ public class MenuBarber extends javax.swing.JDialog {
         }
         this.setearTableBarber();
         this.fillTableListBarber(listBarberFinal);
+    }
+
+    //Metodo para obtener el cliente y enviarlo al otro JDialog
+    private String getIdBarberForSendHairCut() {
+        //Ubicamos la fila en la cual realizamos el evento
+        int rowSelected = tableBarber.getSelectedRow();
+        //Seleccionamos el DNI de la fila seleccionada
+        String idBarber = String.valueOf(tableBarber.getValueAt(rowSelected, 0));
+        return idBarber;
     }
 
 //______________________________________________________________________________________________________________
@@ -1100,19 +1108,23 @@ public class MenuBarber extends javax.swing.JDialog {
     }//GEN-LAST:event_txtSearchBarberActionPerformed
 
     private void tableBarberKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tableBarberKeyPressed
-        if (evt.getKeyChar() == 'm') {
-            if (evt.isAltDown()) {
-                quickModification();
-            }
-        } else if (evt.getKeyChar() == 'd') {
-            if (evt.isAltDown()) {
-                quickDelete();
-            }
+        if (evt.getKeyChar() == 'm' && evt.isAltDown()) {
+            quickModification();
+        }
+        if (evt.getKeyChar() == 'd' && evt.isAltDown()) {
+            quickDelete();
+        }
+        if (evt.isAltDown() && evt.getKeyChar() == 'c') {
+            MenuHairCutsBarber mhb = new MenuHairCutsBarber(null, true, this.getIdBarberForSendHairCut());
+            mhb.setVisible(true);
         }
     }//GEN-LAST:event_tableBarberKeyPressed
 
     private void tableBarberMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableBarberMouseClicked
-
+        if (evt.getClickCount() == 2) {
+            MenuHairCutsBarber mhb = new MenuHairCutsBarber(null, true, this.getIdBarberForSendHairCut());
+            mhb.setVisible(true);
+        }
     }//GEN-LAST:event_tableBarberMouseClicked
 
     private void txtPhoneModifKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPhoneModifKeyPressed

@@ -14,16 +14,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HairCutDAOImpl implements DAOHairCut {
-    
+
     private ConnectionDB myConnection;
     private Connection c;
-    
+
     public HairCutDAOImpl() {
         myConnection = ConnectionDB.instanciar();
         c = myConnection.connect();
         System.out.println("HairCut DAO");
     }
-    
+
     @Override
     public int save(HairCut o) {
         List<HairCut> lista = toList();
@@ -31,10 +31,10 @@ public class HairCutDAOImpl implements DAOHairCut {
         if (!lista.contains(o)) {
             c = myConnection.connect();
             if (c != null) {
-                
+
                 String consultaSQL = "INSERT INTO HairCut (idHairCut,idClient,idBarber,cuts,date,price,priceBarber) VALUES (?,?,?,?,?,?,?)";
                 PreparedStatement ps = null;
-                
+
                 try {
                     ps = c.prepareStatement(consultaSQL);
                     ps.setInt(1, o.getIdHairCut());
@@ -44,11 +44,11 @@ public class HairCutDAOImpl implements DAOHairCut {
                     ps.setTimestamp(5, o.getDate());
                     ps.setDouble(6, o.getPrice());
                     ps.setDouble(7, o.getPriceBarber());
-                    
+
                     r = ps.executeUpdate();
                     ps.close();
                     return r;
-                    
+
                 } catch (SQLException ex) {
                     Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
@@ -60,49 +60,48 @@ public class HairCutDAOImpl implements DAOHairCut {
                 }
             }
         }
-        
+
         return r;
     }
-    
+
     @Override
     public List<HairCut> queryFilter(int code, String name) {
         List<HairCut> list = null;
         String consultaSQL = "";
         if (c != null) {
             try {
-                if (code != 0 && code > 0) {
+                if (name.equalsIgnoreCase("Cliente")) {
                     consultaSQL += "SELECT `haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`price` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber WHERE idClient = ?";
-                } else if (code == 0) {
-                    consultaSQL += "SELECT `haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`priceBarber` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber";
+                } else if (name.equalsIgnoreCase("Barbero")) {
+                    consultaSQL += "SELECT `haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`priceBarber`,`haircut`.`price` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber WHERE `haircut`.`idBarber` = ?";
+                } else {
+                    consultaSQL += "SELECT `haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`priceBarber`,`haircut`.`price` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber";
                 }
-                
-                PreparedStatement ps = c.prepareStatement(consultaSQL);
-                if (code != 0 && code > 0) {
+
+                ResultSet rs;
+                try (PreparedStatement ps = c.prepareStatement(consultaSQL)) {
                     ps.setInt(1, code);
+                    rs = ps.executeQuery();
+                    list = new ArrayList<>();
+                    while (rs.next()) {
+                        HairCut hairCut = new HairCut();
+                        hairCut.setDate(rs.getTimestamp("date"));
+
+                        Barber b = new Barber();
+                        b.setName(rs.getString("name"));
+                        b.setLastName(rs.getString("lastName"));
+                        hairCut.setBarber(b);
+
+                        hairCut.setCuts(rs.getString("cuts"));
+                        hairCut.setPrice(rs.getDouble("price"));
+
+                        list.add(hairCut);
+                    }
                 }
-                ResultSet rs = ps.executeQuery();
-                
-                list = new ArrayList<>();
-                while (rs.next()) {
-                    HairCut hairCut = new HairCut();
-                    hairCut.setDate(rs.getTimestamp("date"));
-                    
-                    Barber b = new Barber();
-                    b.setName(rs.getString("name"));
-                    b.setLastName(rs.getString("lastName"));
-                    hairCut.setBarber(b);
-                    
-                    hairCut.setCuts(rs.getString("cuts"));
-                    hairCut.setPrice(rs.getDouble("price"));
-                    
-                    list.add(hairCut);
-                }
-                
-                ps.close();
                 rs.close();
-                
+
                 return list;
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
@@ -115,7 +114,7 @@ public class HairCutDAOImpl implements DAOHairCut {
         }
         return list;
     }
-    
+
     @Override
     public int modificar(int code, HairCut o) {
         int r = 0;
@@ -131,16 +130,16 @@ public class HairCutDAOImpl implements DAOHairCut {
                 ps.setDouble(6, o.getPrice());
                 ps.setDouble(7, o.getPriceBarber());
                 r = ps.executeUpdate();
-                
+
                 ps.close();
                 return r;
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
                     c.close();
-                    
+
                 } catch (SQLException ex) {
                     Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -148,37 +147,37 @@ public class HairCutDAOImpl implements DAOHairCut {
         }
         return r;
     }
-    
+
     @Override
     public List<HairCut> toList() {
         List<HairCut> list = null;
         if (c != null) {
             try {
                 String consultaSQL = "SELECT idHairCut,idClient,idBarber,cuts,date,price,priceBarber FROM HairCut";
-                
+
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ResultSet rs = ps.executeQuery();
-                
+
                 list = new ArrayList<>();
                 while (rs.next()) {
                     HairCut hairCut = new HairCut();
                     hairCut.setDate(rs.getTimestamp("date"));
-                    
+
                     Barber b = new Barber();
                     b.setIdBarber(rs.getInt("idBarber"));
                     hairCut.setBarber(b);
-                    
+
                     hairCut.setCuts(rs.getString("cuts"));
                     hairCut.setPrice(rs.getDouble("price"));
                     hairCut.setPriceBarber(rs.getDouble("priceBarber"));
                     list.add(hairCut);
                 }
-                
+
                 ps.close();
                 rs.close();
-                
+
                 return list;
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
@@ -191,7 +190,7 @@ public class HairCutDAOImpl implements DAOHairCut {
         }
         return list;
     }
-    
+
     @Override
     public int delete(int code) {
         int r = 0;
@@ -199,17 +198,17 @@ public class HairCutDAOImpl implements DAOHairCut {
             try {
                 PreparedStatement ps = c.prepareStatement("DELETE FROM HairCut WHERE idHairCut=?");
                 ps.setInt(1, code);
-                
+
                 r = ps.executeUpdate();
                 ps.close();
                 return r;
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
                     c.close();
-                    
+
                 } catch (SQLException ex) {
                     Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -217,41 +216,89 @@ public class HairCutDAOImpl implements DAOHairCut {
         }
         return r;
     }
-    
+
     @Override
     public List<HairCut> queryFilterForDate(String time) {
         List<HairCut> list = null;
         if (c != null) {
             try {
                 String consultaSQL = "SELECT `haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`price`,`haircut`.`priceBarber` FROM `haircut` INNER JOIN `barber` ON `haircut`.`idBarber`= barber.idBarber WHERE DATE(`hairCut`.`date`)= ?";
-                
+
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ps.setString(1, time);
-                
+
                 ResultSet rs = ps.executeQuery();
-                
+
                 list = new ArrayList<>();
                 while (rs.next()) {
                     HairCut hairCut = new HairCut();
                     hairCut.setDate(rs.getTimestamp("date"));
-                    
+
                     Barber b = new Barber();
                     b.setName(rs.getString("name"));
                     b.setLastName(rs.getString("lastName"));
                     hairCut.setBarber(b);
-                    
+
                     hairCut.setCuts(rs.getString("cuts"));
                     hairCut.setPrice(rs.getDouble("price"));
                     hairCut.setPriceBarber(rs.getDouble("priceBarber"));
-                    
+
                     list.add(hairCut);
                 }
-                
+
                 ps.close();
                 rs.close();
-                
+
                 return list;
-                
+
+            } catch (SQLException ex) {
+                Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    c.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public List<HairCut> queryFilterForDateBetwen(int idBarber, String since, String until) {
+        List<HairCut> list = null;
+        if (c != null) {
+            try {
+                String consultaSQL = "SELECT `haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`priceBarber`,`haircut`.`price` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber WHERE `haircut`.`idBarber` = ? AND `haircut`.`date` BETWEEN ? AND ?";
+                PreparedStatement ps = c.prepareStatement(consultaSQL);
+                ps.setInt(1, idBarber);
+                ps.setString(2, since);
+                ps.setString(3, until);
+
+                ResultSet rs = ps.executeQuery();
+
+                list = new ArrayList<>();
+                while (rs.next()) {
+                    HairCut hairCut = new HairCut();
+                    hairCut.setDate(rs.getTimestamp("date"));
+
+                    Barber b = new Barber();
+                    b.setName(rs.getString("name"));
+                    b.setLastName(rs.getString("lastName"));
+                    hairCut.setBarber(b);
+
+                    hairCut.setCuts(rs.getString("cuts"));
+                    hairCut.setPrice(rs.getDouble("price"));
+                    hairCut.setPriceBarber(rs.getDouble("priceBarber"));
+
+                    list.add(hairCut);
+                }
+
+                ps.close();
+                rs.close();
+
+                return list;
+
             } catch (SQLException ex) {
                 Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
