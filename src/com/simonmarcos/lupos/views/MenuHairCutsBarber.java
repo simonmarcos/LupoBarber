@@ -95,6 +95,7 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
             });
             tableHairCutsBarber.setModel(dtm);
             lblCountCuts.setText("Cortes realizados: " + list.size());
+        } else {
         }
     }
 
