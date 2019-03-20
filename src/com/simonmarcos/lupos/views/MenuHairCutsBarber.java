@@ -1,8 +1,10 @@
 package com.simonmarcos.lupos.views;
 
 import com.simonmarcos.lupos.dao.DAOHairCut;
+import com.simonmarcos.lupos.dao.impl.ClientDAOImpl;
 import com.simonmarcos.lupos.dao.impl.HairCutDAOImpl;
 import com.simonmarcos.lupos.model.Barber;
+import com.simonmarcos.lupos.model.Client;
 import com.simonmarcos.lupos.model.HairCut;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
     private DefaultTableModel dtm = null;
     private List<HairCut> listHairCut;
     private List<HairCut> listHairCutFinal;
+    private List<Client> listClient;
     private String idBarber = "";
 
     public MenuHairCutsBarber(java.awt.Frame parent, boolean modal, String idBarber) {
@@ -27,7 +30,7 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
         this.idBarber = idBarber;
         this.setearTableHairCuts();
         this.getAllHairCutsDeterminateBarber();
-        this.setearRowWithFinalDate();
+
     }
 
     //_____________________ METODOS PARA MANIPULAR LA TABLA DE CORTE DE PELOS __________________________
@@ -85,9 +88,16 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
     private void fillTableListHairCuts(List<HairCut> list) {
         if (list.size() > 0 || list != null) {
             String[] fila = new String[4];
+
+            //Buscamos todos los clientes
+            this.getAllClient();
             list.stream().forEach(hairCut -> {
                 fila[0] = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(hairCut.getDate());
-                fila[1] = hairCut.getBarber().getLastName() + " " + hairCut.getBarber().getName();
+
+                //Llamamos al metodo y obtenemos un string con el nombre y apellido correspondiente al ID
+                String[] info = this.searchClientByID(hairCut.getClient().getIdClient());
+                fila[1] = info[1] + " " + info[0];
+
                 fila[2] = hairCut.getCuts();
                 fila[3] = String.valueOf(hairCut.getPrice());
 
@@ -95,8 +105,28 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
             });
             tableHairCutsBarber.setModel(dtm);
             lblCountCuts.setText("Cortes realizados: " + list.size());
+            setearRowWithFinalDate();
         } else {
         }
+    }
+
+    //Metodo para obtener todos los clientes
+    private void getAllClient() {
+        listClient = new ClientDAOImpl().toList();
+    }
+
+    //Metodo que me buscara el cliente segun el id, para luego comparar el id pasado y el id de la lista de clientes
+    //para luego devolver un String con su nombre y apellido
+    private String[] searchClientByID(int idClient) {
+        String[] info = new String[2];
+        for (Client c : listClient) {
+            if (c.getIdClient() == idClient) {
+                info[0] = c.getName();
+                info[1] = c.getLastName();
+                break;
+            }
+        }
+        return info;
     }
 
     //_______________________________________________________________________________________________________
@@ -105,8 +135,8 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
         listHairCutFinal = new ArrayList<>();
         if (listHairCut != null || listHairCut.size() > 0) {
             listHairCut.stream().forEach(h -> {
-                String name = h.getBarber().getName().toLowerCase();
-                String lastName = h.getBarber().getLastName().toLowerCase();
+                String name = searchClientByID(h.getClient().getIdClient())[0].toLowerCase();
+                String lastName = searchClientByID(h.getClient().getIdClient())[1].toLowerCase();
                 String typeCut = h.getCuts().toLowerCase();
                 String date = h.getDate().toString().toLowerCase();
                 System.out.println(text);

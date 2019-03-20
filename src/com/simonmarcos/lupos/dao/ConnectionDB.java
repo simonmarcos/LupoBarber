@@ -31,12 +31,13 @@ public class ConnectionDB {
             isConected = true;
         } catch (SQLException ex) {
             try {
-                Process process = Runtime.getRuntime().exec("C:\\xampp\\xampp-start.exe");
+                Process process = Runtime.getRuntime().exec("C:\\xampp\\xampp_start.exe");
                 c = DriverManager.getConnection("jdbc:mysql://localhost:3306/luposbarber", "root", "");
                 isConected = true;
             } catch (SQLException ex1) {
                 JOptionPane.showMessageDialog(null, "No se pudo conectar a la base de datos.");
             } catch (IOException ex1) {
+                JOptionPane.showMessageDialog(null, "No se pudo conectar a la base de datos.");
                 Logger.getLogger(ConnectionDB.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
