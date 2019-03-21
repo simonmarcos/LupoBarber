@@ -4,17 +4,22 @@ import com.simonmarcos.lupos.dao.DAOBarber;
 import com.simonmarcos.lupos.dao.DAOClient;
 import com.simonmarcos.lupos.dao.DAOCuts;
 import com.simonmarcos.lupos.dao.DAOHairCut;
+import com.simonmarcos.lupos.dao.DAOTotalCuts;
 import com.simonmarcos.lupos.dao.impl.BarberDAOImpl;
 import com.simonmarcos.lupos.dao.impl.ClientDAOImpl;
 import com.simonmarcos.lupos.dao.impl.CutsDAOImpl;
 import com.simonmarcos.lupos.dao.impl.HairCutDAOImpl;
+import com.simonmarcos.lupos.dao.impl.TotalCutsDAOImpl;
 import com.simonmarcos.lupos.model.Barber;
 import com.simonmarcos.lupos.model.Client;
 import com.simonmarcos.lupos.model.Cuts;
 import com.simonmarcos.lupos.model.HairCut;
+import com.simonmarcos.lupos.model.TotalCuts;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -42,7 +47,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         this.dimensionWindows();
         this.setImgBtnClient();
         this.setImgBtnBarber();
-        this.setImgBtnCuts();
+        this.setImgBtnStadistics();
         this.setImgPanelLogoLupos();
         this.setearTableBarberCuts();
         this.fillTableBarberCuts();
@@ -50,6 +55,43 @@ public class MenuPrincipal extends javax.swing.JFrame {
         this.fillListAllBarber();
         this.fillTableBarberHairCutsToday();
         this.getDateToday();
+
+        this.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                saveAllCutsOfDay();
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+
+            }
+        });
     }
 
     private void dimensionWindows() {
@@ -74,6 +116,32 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
         combolistAllClient.setSelectedIndex(0);
         combolistAllBarber.setSelectedIndex(0);
+    }
+
+    //_________________________________________________________________________________________________________
+    //METODO PARA GUARDAR TODOS LOS CORTES DEL DIA CON LAS GANANCIAS EN LA BASE DE DATOS
+    //Este metodo me guardara todos los cortes diarios
+    private void saveAllCutsOfDay() {
+        DAOTotalCuts daoDelete = new TotalCutsDAOImpl();
+        TotalCuts tc = new TotalCuts();
+        tc.setCutsAdult(Integer.parseInt(lblCutsAdult.getText().split(": ")[1].trim()));
+        tc.setCutsBoy(Integer.parseInt(lblCutsBoy.getText().split(": ")[1].trim()));
+        tc.setCutsBeard(Integer.parseInt(lblCutsBeard.getText().split(": ")[1].trim()));
+        tc.setCutsDrawing(Integer.parseInt(lblCutsDraw.getText().split(": ")[1].trim()));
+        tc.setDate(new java.sql.Date(new java.util.Date().getTime()));
+        tc.setEarningsTotal(Double.parseDouble(lblEarningsTotal.getText().split(": ")[1].trim()));
+        tc.setEarningsLupos(Double.parseDouble(lblEarnings.getText().split(": ")[1].trim()));
+
+        //Primero eliminamos los datos en la fecha actual si es que los hay
+        int rDelete = daoDelete.deleteByDate(tc.getDate().toString());
+        //Luego lo agregamos en la base de datos en el caso de que no se haya producido ningun error al eliminar
+        if (rDelete != 3) {
+            DAOTotalCuts daoSave = new TotalCutsDAOImpl();
+            int rSave = daoSave.save(tc);
+            if (rSave == 1) {
+                JOptionPane.showMessageDialog(null, "Los datos se guardaron correctamente.");
+            }
+        }
     }
 
     //_________________________________________________________________________________________________________
@@ -374,8 +442,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
         lblCutsBoy.setText("Cortes Niños: " + countHairCutsBoys);
         lblCutsBeard.setText("Barba: " + countHairCutsBeader);
         lblCutsDraw.setText("Dibujos: " + countHairCutsDrawing);
-        lblEarningsTotal.setText("Ganancias Total: $ " + earnings);
-        lblEarnings.setText("Ganancias: $ " + (earnings - countEarnings));
+        lblEarningsTotal.setText("Ganancias Total: " + earnings);
+        lblEarnings.setText("Ganancias: " + (earnings - countEarnings));
     }
 
     //______________________________________________________________________________________________________________
@@ -450,9 +518,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
         }
     }
 
-    private void setImgBtnCuts() {
+    private void setImgBtnStadistics() {
         try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoCuts.jpg"));
+            Image imgSearch = ImageIO.read(getClass().getResource("/img/statistics.png"));
             Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnCuts.getWidth(), btnCuts.getHeight(), Image.SCALE_DEFAULT));
             btnCuts.setIcon(iconSearch);
         } catch (IOException ex) {
@@ -520,13 +588,14 @@ public class MenuPrincipal extends javax.swing.JFrame {
         checkCutBoy = new javax.swing.JCheckBox();
         checkCutBeard = new javax.swing.JCheckBox();
         checkCutDrawing = new javax.swing.JCheckBox();
-        jButton1 = new javax.swing.JButton();
+        btnSaveTotalCuts = new javax.swing.JButton();
         lblCutsBoy = new javax.swing.JLabel();
         lblCutsBeard = new javax.swing.JLabel();
         lblCutsDraw = new javax.swing.JLabel();
         lblEarningsTotal = new javax.swing.JLabel();
         lblCutsAdult = new javax.swing.JLabel();
         lblEarnings = new javax.swing.JLabel();
+        btnUpdate = new javax.swing.JButton();
 
         jFrame1.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         jFrame1.setBackground(new java.awt.Color(0, 0, 0));
@@ -1047,7 +1116,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
         jLabel5.setFont(new java.awt.Font("Comic Sans MS", 3, 24)); // NOI18N
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel5.setText("CORTES");
+        jLabel5.setText("ESTADISTICAS");
 
         btnClient.setBackground(new java.awt.Color(255, 255, 255));
         btnClient.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153), 4));
@@ -1177,15 +1246,15 @@ public class MenuPrincipal extends javax.swing.JFrame {
         checkCutDrawing.setText("Dibujo");
         checkCutDrawing.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        jButton1.setBackground(new java.awt.Color(0, 153, 204));
-        jButton1.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("ACTUALIZAR");
-        jButton1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
-        jButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnSaveTotalCuts.setBackground(new java.awt.Color(0, 153, 204));
+        btnSaveTotalCuts.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        btnSaveTotalCuts.setForeground(new java.awt.Color(255, 255, 255));
+        btnSaveTotalCuts.setText("GUARDAR");
+        btnSaveTotalCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        btnSaveTotalCuts.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnSaveTotalCuts.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnSaveTotalCutsActionPerformed(evt);
             }
         });
 
@@ -1221,6 +1290,18 @@ public class MenuPrincipal extends javax.swing.JFrame {
         lblEarnings.setText("jLabel9");
         lblEarnings.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 0, 0), 2));
 
+        btnUpdate.setBackground(new java.awt.Color(0, 153, 204));
+        btnUpdate.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        btnUpdate.setForeground(new java.awt.Color(255, 255, 255));
+        btnUpdate.setText("ACTUALIZAR");
+        btnUpdate.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        btnUpdate.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -1239,7 +1320,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
                                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(46, 46, 46)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(btnConfirm, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(39, 39, 39)
@@ -1252,17 +1332,24 @@ public class MenuPrincipal extends javax.swing.JFrame {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                             .addComponent(checkCutBoy, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(checkCutDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                            .addComponent(checkCutDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                            .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
-                        .addComponent(lblCutsBoy, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(26, 26, 26)
-                        .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblCutsDraw, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(34, 34, 34)
+                                .addComponent(lblCutsBoy, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(26, 26, 26)
+                                .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(lblCutsDraw, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(btnSaveTotalCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 336, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(161, 161, 161)))
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(lblEarningsTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE)
                             .addComponent(lblEarnings, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
@@ -1292,9 +1379,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
                         .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(btnConfirm, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(combolistAllClient, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1306,7 +1393,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
                         .addComponent(lblCutsDraw, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(lblEarnings, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSaveTotalCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1410,12 +1499,13 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCambiarTema6ActionPerformed
 
     private void btnBarberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBarberActionPerformed
-        MenuBarber mb = new MenuBarber(this, false);
+        MenuBarber mb = new MenuBarber(this, true);
         mb.setVisible(true);
     }//GEN-LAST:event_btnBarberActionPerformed
 
     private void btnCutsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCutsActionPerformed
-        // TODO add your handling code here:
+        MenuCuts mc = new MenuCuts(this, false);
+        mc.setVisible(true);
     }//GEN-LAST:event_btnCutsActionPerformed
 
     private void btnClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClientActionPerformed
@@ -1445,17 +1535,21 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnConfirmActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnSaveTotalCutsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveTotalCutsActionPerformed
+        saveAllCutsOfDay();
+    }//GEN-LAST:event_btnSaveTotalCutsActionPerformed
+
+    private void jPanel3KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jPanel3KeyTyped
+
+    }//GEN-LAST:event_jPanel3KeyTyped
+
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         this.setearTableBarberCuts();
         this.fillListAllBarber();
         this.fillListAllClient();
         this.fillTableBarberCuts();
         this.fillTableBarberHairCutsToday();
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void jPanel3KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jPanel3KeyTyped
-        System.out.println(evt.getKeyChar());
-    }//GEN-LAST:event_jPanel3KeyTyped
+    }//GEN-LAST:event_btnUpdateActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAntecedentes;
@@ -1478,6 +1572,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton btnGaleria1;
     private javax.swing.JButton btnPromotora;
     private javax.swing.JButton btnPromotora1;
+    private javax.swing.JButton btnSaveTotalCuts;
+    private javax.swing.JButton btnUpdate;
     private javax.swing.JCheckBox checkCutAdult;
     private javax.swing.JCheckBox checkCutBeard;
     private javax.swing.JCheckBox checkCutBoy;
@@ -1486,7 +1582,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> combolistAllClient;
     private javax.swing.JLabel imgLogo;
     private javax.swing.JLabel imgLogo1;
-    private javax.swing.JButton jButton1;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JFrame jFrame2;
     private javax.swing.JLabel jLabel1;
@@ -1520,4 +1615,5 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JTable tablaCumpleanos1;
     private javax.swing.JTable tableBarberCuts;
     // End of variables declaration//GEN-END:variables
+
 }
