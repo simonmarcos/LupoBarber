@@ -1,8 +1,8 @@
 package com.simonmarcos.lupos.views;
 
-import com.simonmarcos.lupos.dao.impl.HairCutDAOImpl;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import com.simonmarcos.lupos.dao.impl.TotalCutsDAOImpl;
+import com.simonmarcos.lupos.model.TotalCuts;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jfree.chart.ChartFactory;
@@ -11,11 +11,11 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-public class MenuCuts extends javax.swing.JDialog {
+public class MenuStatistics extends javax.swing.JDialog {
 
     private String[] listMonth = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
 
-    public MenuCuts(java.awt.Frame parent, boolean modal) {
+    public MenuStatistics(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         this.setFocusable(true);
@@ -88,18 +88,35 @@ public class MenuCuts extends javax.swing.JDialog {
         return 0;
     }
 
-    //Metodo que me abrira la ventada de la estadisticas
-    private void generateStadisticGraphics() {
-        if (checkSearchYear.isSelected()) {
-            String year = jListYear.getSelectedItem().toString();
-            try {
-                DefaultCategoryDataset ds = new DefaultCategoryDataset();
-                for (int i = 0; i < listMonth.length; i++) {
-                    double earnings = new HairCutDAOImpl().queryGetEarningsTotal("", "", 3, i + 1, Integer.parseInt(year));
-                    ds.setValue(earnings, listMonth[i], "");
-                }
+    private Map<String, Double> getMapWithMonthAndEarnings() {
+        String year = jListYear.getSelectedItem().toString();
+        //Lista que me guardara las ganancias correspondiente a cada mes
+        Map<String, Double> mapMonthAndEarnings = new HashMap<>();
 
-                JFreeChart jf = ChartFactory.createBarChart3D("Diagrama Ganancias", "Mes", "Ganancia", ds, PlotOrientation.VERTICAL, true, true, true);
+        //DefaultCategoryDataset ds = new DefaultCategoryDataset();
+        for (int i = 0; i < listMonth.length; i++) {
+            double earningsLupos = 0;
+            List<TotalCuts> listTC = new TotalCutsDAOImpl().queryGetByMonthAndYear(i + 1, Integer.parseInt(year));
+            for (TotalCuts totalCuts : listTC) {
+                earningsLupos += totalCuts.getEarningsLupos();
+            }
+            mapMonthAndEarnings.put(listMonth[i], earningsLupos);
+        }
+        return mapMonthAndEarnings;
+    }
+
+    //Metodo que me abrira la ventada de la estadisticas
+    private void generateReporAndStadisticGraphicsForYear() {
+        if (checkSearchYear.isSelected()) {
+            Map<String, Double> map = this.getMapWithMonthAndEarnings();
+            double total = 0;
+            try {
+                DefaultCategoryDataset dc = new DefaultCategoryDataset();
+                for (Map.Entry<String, Double> e : map.entrySet()) {
+                    // dc.setValue(entry.getValue(), entry.getKey(), "");
+                    System.out.println(e.getKey() + "   " + e.getValue());
+                }
+                JFreeChart jf = ChartFactory.createBarChart3D("Diagrama Ganancias", "Mes", "Ganancia", dc, PlotOrientation.VERTICAL, true, true, true);
                 ChartFrame cf = new ChartFrame("", jf);
                 cf.setSize(1000, 600);
                 cf.setLocationRelativeTo(null);
@@ -273,7 +290,7 @@ public class MenuCuts extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        this.generateStadisticGraphics();
+        this.generateReporAndStadisticGraphicsForYear();
     }//GEN-LAST:event_btnSearchActionPerformed
 
 

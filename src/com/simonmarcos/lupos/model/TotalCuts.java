@@ -24,6 +24,16 @@ public class TotalCuts {
         this.earningsLupos = earningsLupos;
     }
 
+    public TotalCuts(int cutsAdult, int cutsBoy, int cutsBeard, int cutsDrawing, Date date, double earningsTotal, double earningsLupos) {
+        this.cutsAdult = cutsAdult;
+        this.cutsBoy = cutsBoy;
+        this.cutsBeard = cutsBeard;
+        this.cutsDrawing = cutsDrawing;
+        this.date = date;
+        this.earningsTotal = earningsTotal;
+        this.earningsLupos = earningsLupos;
+    }
+
     public TotalCuts() {
     }
 

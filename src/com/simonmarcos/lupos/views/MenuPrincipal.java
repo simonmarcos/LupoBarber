@@ -1504,7 +1504,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBarberActionPerformed
 
     private void btnCutsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCutsActionPerformed
-        MenuCuts mc = new MenuCuts(this, false);
+        MenuStatistics mc = new MenuStatistics(this, false);
         mc.setVisible(true);
     }//GEN-LAST:event_btnCutsActionPerformed
 
