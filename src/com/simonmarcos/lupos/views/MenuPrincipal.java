@@ -136,10 +136,13 @@ public class MenuPrincipal extends javax.swing.JFrame {
         int rDelete = daoDelete.deleteByDate(tc.getDate().toString());
         //Luego lo agregamos en la base de datos en el caso de que no se haya producido ningun error al eliminar
         if (rDelete != 3) {
-            DAOTotalCuts daoSave = new TotalCutsDAOImpl();
-            int rSave = daoSave.save(tc);
-            if (rSave == 1) {
-                JOptionPane.showMessageDialog(null, "Los datos se guardaron correctamente.");
+            //Comprobamos que las ganancias sean mayor a 0 para recien guardar en la base de datos
+            if (Double.parseDouble(lblEarningsTotal.getText().split(": ")[1].trim()) > 0) {
+                DAOTotalCuts daoSave = new TotalCutsDAOImpl();
+                int rSave = daoSave.save(tc);
+                if (rSave == 1) {
+                    JOptionPane.showMessageDialog(null, "Los datos se guardaron correctamente.");
+                }
             }
         }
     }
@@ -1037,7 +1040,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         panelLogoLupos.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         btnCambiarTema5.setBackground(new java.awt.Color(0, 0, 0));
-        btnCambiarTema5.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        btnCambiarTema5.setFont(new java.awt.Font("Arial Unicode MS", 1, 18)); // NOI18N
         btnCambiarTema5.setForeground(new java.awt.Color(255, 255, 255));
         btnCambiarTema5.setText("GUARDAR BASE DE DATOS");
         btnCambiarTema5.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -1048,7 +1051,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         });
 
         btnCambiarTema6.setBackground(new java.awt.Color(0, 0, 0));
-        btnCambiarTema6.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        btnCambiarTema6.setFont(new java.awt.Font("Arial Unicode MS", 1, 18)); // NOI18N
         btnCambiarTema6.setForeground(new java.awt.Color(255, 255, 255));
         btnCambiarTema6.setText("CARGAR BASE DE DATAOS");
         btnCambiarTema6.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -1063,10 +1066,10 @@ public class MenuPrincipal extends javax.swing.JFrame {
         panelLogoLuposLayout.setHorizontalGroup(
             panelLogoLuposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelLogoLuposLayout.createSequentialGroup()
-                .addComponent(logoLuposBarber, javax.swing.GroupLayout.DEFAULT_SIZE, 834, Short.MAX_VALUE)
+                .addComponent(logoLuposBarber, javax.swing.GroupLayout.DEFAULT_SIZE, 740, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLogoLuposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnCambiarTema5, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE)
+                    .addComponent(btnCambiarTema5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCambiarTema6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1219,7 +1222,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         });
 
         btnConfirm.setBackground(new java.awt.Color(0, 153, 204));
-        btnConfirm.setFont(new java.awt.Font("Arial", 1, 36)); // NOI18N
+        btnConfirm.setFont(new java.awt.Font("Arial Unicode MS", 3, 36)); // NOI18N
         btnConfirm.setForeground(new java.awt.Color(255, 255, 255));
         btnConfirm.setText("CONFIRMAR");
         btnConfirm.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
@@ -1247,7 +1250,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         checkCutDrawing.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         btnSaveTotalCuts.setBackground(new java.awt.Color(0, 153, 204));
-        btnSaveTotalCuts.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        btnSaveTotalCuts.setFont(new java.awt.Font("Arial Unicode MS", 3, 18)); // NOI18N
         btnSaveTotalCuts.setForeground(new java.awt.Color(255, 255, 255));
         btnSaveTotalCuts.setText("GUARDAR");
         btnSaveTotalCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
@@ -1291,7 +1294,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         lblEarnings.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 0, 0), 2));
 
         btnUpdate.setBackground(new java.awt.Color(0, 153, 204));
-        btnUpdate.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        btnUpdate.setFont(new java.awt.Font("Arial Unicode MS", 3, 18)); // NOI18N
         btnUpdate.setForeground(new java.awt.Color(255, 255, 255));
         btnUpdate.setText("ACTUALIZAR");
         btnUpdate.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
@@ -1393,9 +1396,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
                         .addComponent(lblCutsDraw, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(lblEarnings, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSaveTotalCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnSaveTotalCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 

@@ -346,47 +346,20 @@ public class HairCutDAOImpl implements DAOHairCut {
     }
 
     @Override
-    public double queryGetEarningsTotal(String since, String until, int queryType, int month, int year) {
+    public double queryGetEarningsTotal(String since, String until) {
         double earningsTotal = 0;
-        String consultaSQL = "";
+        /*  String consultaSQL = "";
         if (c != null) {
             try {
                 //Si quiere las ganancias total del negocio sin descontar lo de los barberos
-                switch (queryType) {
-                    //Si quiere las ganancias que tuvo el
-                    case 1:
-                        consultaSQL += "SELECT SUM(`haircut`.`price`) AS gananciaTotal FROM `haircut` WHERE `haircut`.`date` BETWEEN ? AND ?";
-                        break;
-                    //Si quiere las ganancias que tuvo solo el negocio un mes y año en especifico
-                    case 2:
-                        consultaSQL += "SELECT SUM(`haircut`.`price`)-SUM(`haircut`.`priceBarber`) AS gananciaTotal FROM `haircut` WHERE `haircut`.`date` BETWEEN ? AND ?";
-                        break;
-                    //Si quiere las ganancias que tuvo solo el negocio un mes en especifico
-                    case 3:
-                        consultaSQL += "SELECT SUM(`haircut`.`price`)-SUM(`haircut`.`priceBarber`) AS gananciaTotal FROM `haircut` WHERE MONTH(`haircut`.`date`) = ? AND YEAR(`haircut`.`date`) = ?";
-                        break;
-                    case 4:
-                        consultaSQL += "SELECT SUM(`haircut`.`price`)-SUM(`haircut`.`priceBarber`) AS gananciaTotal FROM `haircut` WHERE MONTH(`haircut`.`date`) = ?";
-                        break;
-                    default:
-                        break;
-                }
+
+                consultaSQL += "SELECT SUM(`haircut`.`price`) AS gananciaTotal FROM `haircut` WHERE `haircut`.`date` BETWEEN ? AND ?";
 
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 //En el caso de que solo quiera buscar las ganancias en determinado mes
-                switch (queryType) {
-                    case 3:
-                        ps.setInt(1, month);
-                        ps.setInt(2, year);
-                        break;
-                    case 4:
-                        ps.setInt(1, month);
-                        break;
-                    default:
-                        ps.setString(1, since);
-                        ps.setString(2, until);
-                        break;
-                }
+
+                ps.setString(1, since);
+                ps.setString(2, until);
 
                 ResultSet rs = ps.executeQuery();
 
@@ -408,7 +381,7 @@ public class HairCutDAOImpl implements DAOHairCut {
                     Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        }
+        }  */
         return earningsTotal;
     }
 }

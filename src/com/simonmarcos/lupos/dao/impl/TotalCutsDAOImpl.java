@@ -157,11 +157,58 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
             try {
                 //Si quiere las ganancias total del negocio sin descontar lo de los barberos
 
-                consultaSQL += "SELECT * FROM TotalCuts WHERE MONTH(`totalcuts`.`date`) = ? AND YEAR(`totalcuts`.`date`) = ?";
+                consultaSQL += "SELECT `totalcuts`.`idTotalCuts`,`TotalCuts`.`CutsAdult`,totalCuts.`CutsBoy`,`TotalCuts`.`CutsBeard`,`TotalCuts`.`CutsDrawing`,totalCuts.`date`,totalCuts.`earningsTotal`,totalCuts.`earningsLupos` FROM TotalCuts WHERE MONTH(`totalcuts`.`date`) = ? AND YEAR(`totalcuts`.`date`) = ?";
 
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ps.setInt(1, month);
                 ps.setInt(2, year);
+
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    TotalCuts tc = new TotalCuts();
+                    tc.setIdTotalCuts(rs.getInt("idTotalCuts"));
+                    tc.setCutsAdult(rs.getInt("cutsAdult"));
+                    tc.setCutsBoy(rs.getInt("cutsBoy"));
+                    tc.setCutsBeard(rs.getInt("cutsBeard"));
+                    tc.setCutsDrawing(rs.getInt("cutsDrawing"));
+                    tc.setDate(rs.getDate("date"));
+                    tc.setEarningsTotal(rs.getDouble("earningsTotal"));
+                    tc.setEarningsLupos(rs.getDouble("earningsLupos"));
+                    listTotalCuts.add(tc);
+                }
+
+                ps.close();
+                rs.close();
+
+                return listTotalCuts;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(TotalCuts.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    c.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(TotalCuts.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return listTotalCuts;
+    }
+
+    @Override
+    public List<TotalCuts> queryGetBySinceAndUntil(String since, String until) {
+        List<TotalCuts> listTotalCuts = new ArrayList<>();
+        String consultaSQL = "";
+        if (c != null) {
+            try {
+                //Si quiere las ganancias total del negocio sin descontar lo de los barberos
+
+                consultaSQL += "SELECT `totalcuts`.`idTotalCuts`,`TotalCuts`.`CutsAdult`,totalCuts.`CutsBoy`,`TotalCuts`.`CutsBeard`,`TotalCuts`.`CutsDrawing`,totalCuts.`date`,totalCuts.`earningsTotal`,totalCuts.`earningsLupos` FROM `totalcuts` WHERE `totalcuts`.`date` BETWEEN ? AND ?";
+
+                PreparedStatement ps = c.prepareStatement(consultaSQL);
+                ps.setString(1, since);
+                ps.setString(2, until);
 
                 ResultSet rs = ps.executeQuery();
 
