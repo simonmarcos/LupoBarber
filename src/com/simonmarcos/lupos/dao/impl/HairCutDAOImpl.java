@@ -100,6 +100,7 @@ public class HairCutDAOImpl implements DAOHairCut {
 
                             hairCut.setCuts(rs.getString("cuts"));
                             hairCut.setPrice(rs.getDouble("price"));
+                            hairCut.setPriceBarber(rs.getDouble("priceBarber"));
 
                             list.add(hairCut);
                         }
@@ -122,6 +123,7 @@ public class HairCutDAOImpl implements DAOHairCut {
 
                             hairCut.setCuts(rs.getString("cuts"));
                             hairCut.setPrice(rs.getDouble("price"));
+                            hairCut.setPriceBarber(rs.getDouble("priceBarber"));
 
                             list.add(hairCut);
                         }

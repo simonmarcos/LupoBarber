@@ -11,11 +11,12 @@ public class Barber implements Comparable<Barber> {
     private String phone;
     private java.sql.Date dateEntry;
     private String address;
+    private java.sql.Date birthday;
 
     public Barber() {
     }
 
-    public Barber(int idBarber, String name, String lastName, int dni, String phone, Date dateEntry, String address) {
+    public Barber(int idBarber, String name, String lastName, int dni, String phone, Date dateEntry, String address, Date birthday) {
         this.idBarber = idBarber;
         this.name = name;
         this.lastName = lastName;
@@ -23,6 +24,15 @@ public class Barber implements Comparable<Barber> {
         this.phone = phone;
         this.dateEntry = dateEntry;
         this.address = address;
+        this.birthday = birthday;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public String getAddress() {

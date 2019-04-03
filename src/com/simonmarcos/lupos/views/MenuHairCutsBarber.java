@@ -99,7 +99,7 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
                 fila[1] = info[1] + " " + info[0];
 
                 fila[2] = hairCut.getCuts();
-                fila[3] = String.valueOf(hairCut.getPrice());
+                fila[3] = String.valueOf(hairCut.getPriceBarber());
 
                 dtm.addRow(fila);
             });
@@ -150,7 +150,7 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
                     hairCut.setBarber(barber);
 
                     hairCut.setCuts(h.getCuts());
-                    hairCut.setPrice(h.getPrice());
+                    hairCut.setPrice(h.getPriceBarber());
 
                     listHairCutFinal.add(h);
                 }

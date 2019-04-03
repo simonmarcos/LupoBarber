@@ -1,5 +1,7 @@
 package com.simonmarcos.lupos.model;
 
+import java.sql.Date;
+
 public class Client implements Comparable<Client> {
 
     private int idClient;
@@ -7,16 +9,26 @@ public class Client implements Comparable<Client> {
     private String name;
     private String lastName;
     private String phone;
+    private java.sql.Date birthday;
 
-    public Client(int idClient, int DNI, String name, String lastName, String phone) {
+    public Client(int idClient, int DNI, String name, String lastName, String phone, Date birthday) {
         this.idClient = idClient;
         this.DNI = DNI;
         this.name = name;
         this.lastName = lastName;
         this.phone = phone;
+        this.birthday = birthday;
     }
 
     public Client() {
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public String getPhone() {

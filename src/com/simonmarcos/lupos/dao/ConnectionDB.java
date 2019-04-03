@@ -31,7 +31,7 @@ public class ConnectionDB {
             isConected = true;
         } catch (SQLException ex) {
             try {
-                Process process = Runtime.getRuntime().exec("C:\\xampp\\xampp_start.exe");
+                Process process = Runtime.getRuntime().exec("C:\\xampp\\xampp-control.exe");
                 c = DriverManager.getConnection("jdbc:mysql://localhost:3306/luposbarber", "root", "");
                 isConected = true;
             } catch (SQLException ex1) {
