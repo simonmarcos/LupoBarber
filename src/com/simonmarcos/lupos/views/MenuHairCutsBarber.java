@@ -264,7 +264,9 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
         ));
         jScrollPane1.setViewportView(tableHairCutsBarber);
 
-        dateSince.setDateFormatString("dd/MM/yyyy");
+        dateUntil.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+
+        dateSince.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
 
         btnSearchBarberDate.setText("BUSCAR");
         btnSearchBarberDate.addActionListener(new java.awt.event.ActionListener() {

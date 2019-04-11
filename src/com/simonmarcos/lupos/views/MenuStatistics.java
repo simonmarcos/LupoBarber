@@ -1,12 +1,27 @@
 package com.simonmarcos.lupos.views;
 
+import com.simonmarcos.lupos.dao.DAO;
+import com.simonmarcos.lupos.dao.DAOExpenses;
+import com.simonmarcos.lupos.dao.impl.ExpensesDAOImpl;
 import com.simonmarcos.lupos.dao.impl.TotalCutsDAOImpl;
+import com.simonmarcos.lupos.model.Expenses;
 import com.simonmarcos.lupos.model.TotalCuts;
+import com.sun.glass.events.KeyEvent;
+import com.toedter.calendar.JTextFieldDateEditor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
 import org.jfree.chart.JFreeChart;
@@ -23,6 +38,13 @@ public class MenuStatistics extends javax.swing.JDialog {
     private Map<Integer, Double> mapMonthAndEarningsTotal = null;
     private Map<Integer, Double> mapMonthAndEarningsLupos = null;
 
+    private DefaultTableModel dtm = null;
+    private List<Expenses> listExpenses = new ArrayList<>();
+    private List<Expenses> listExpensesFinal = null;
+    private String[] arrayExpensesPersonal = {"Comida", "Boliche", "Nafta", "Mujeres", "Otros"};
+    private String[] arrayExpensesBarberia = {"Arreglos", "Otros"};
+    private String[] arrayExpensesEmpleados = {"Sueldo", "Otros"};
+
     public MenuStatistics(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
@@ -32,11 +54,78 @@ public class MenuStatistics extends javax.swing.JDialog {
         this.setTitle("Menu Estadísticas");
         this.setDateChooser();
         this.setearField();
+        this.setearTableListExpenses();
+
+        //Codigo para cuando hacemos click en cada pestaña
+        pestanas.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                switch (pestanas.getSelectedIndex()) {
+                    case 0:
+                        setearFielExpenses();
+                        break;
+                    case 1:
+                        setearTableListExpenses();
+                        getAllExpenses();
+                        fillTableListExpenses(listExpenses);
+                        break;
+                    case 2:
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+
+        //Codigo para cuando hacemos click en la lista de la categorias de gastos
+        listCategory.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (listCategory.getSelectedItem().toString().equalsIgnoreCase("Personal")) {
+                    listTypeExpenses.setEnabled(true);
+                    setearListTypeExpenses(arrayExpensesPersonal);
+                } else if (listCategory.getSelectedItem().toString().equalsIgnoreCase("Barbería")) {
+                    listTypeExpenses.setEnabled(true);
+                    setearListTypeExpenses(arrayExpensesBarberia);
+                } else {
+                    listTypeExpenses.setEnabled(true);
+                    setearListTypeExpenses(arrayExpensesEmpleados);
+                }
+            }
+        });
     }
 
     private void setDateChooser() {
         dateSince.setDate(new Date());
         dateUntil.setDate(new Date());
+        dateExpenses.setDate(new Date());
+        dateSinceExpenses.setDate(new Date());
+        dateUntilExpenses.setDate(new Date());
+
+        dateSince.setDateFormatString("dd-MM-yyyy");
+        JTextFieldDateEditor editorDateSince = (JTextFieldDateEditor) dateSince.getDateEditor();
+        editorDateSince.setEditable(false);
+        editorDateSince.setHorizontalAlignment(JTextField.CENTER);
+
+        dateUntil.setDateFormatString("dd-MM-yyyy");
+        JTextFieldDateEditor editorDateUntil = (JTextFieldDateEditor) dateUntil.getDateEditor();
+        editorDateUntil.setEditable(false);
+        editorDateUntil.setHorizontalAlignment(JTextField.CENTER);
+
+        dateExpenses.setDateFormatString("dd-MM-yyyy");
+        JTextFieldDateEditor editorDateExpenses = (JTextFieldDateEditor) dateExpenses.getDateEditor();
+        editorDateExpenses.setEditable(false);
+        editorDateExpenses.setHorizontalAlignment(JTextField.CENTER);
+
+        dateSinceExpenses.setDateFormatString("dd-MM-yyyy");
+        JTextFieldDateEditor editorDateExpensesSince = (JTextFieldDateEditor) dateSinceExpenses.getDateEditor();
+        editorDateExpensesSince.setEditable(false);
+        editorDateExpensesSince.setHorizontalAlignment(JTextField.CENTER);
+
+        dateUntilExpenses.setDateFormatString("dd-MM-yyyy");
+        JTextFieldDateEditor editorDateExpensesUntil = (JTextFieldDateEditor) dateUntilExpenses.getDateEditor();
+        editorDateExpensesUntil.setEditable(false);
+        editorDateExpensesUntil.setHorizontalAlignment(JTextField.CENTER);
     }
 
     private void setearField() {
@@ -53,6 +142,18 @@ public class MenuStatistics extends javax.swing.JDialog {
         rbSearchReport.setToolTipText("Confirmar búsqueda");
         rbSearchDiagram.setToolTipText("Confirmar búsqueda");
         btnOpenGraphics.setToolTipText("Botón para generar diagrama gráfico");
+    }
+
+    private void setearListTypeExpenses(String[] arrays) {
+        listTypeExpenses.removeAllItems();
+        for (int i = 0; i < arrays.length; i++) {
+            listTypeExpenses.addItem(arrays[i]);
+        }
+    }
+
+    private void setearFielExpenses() {
+        textAreaDescription.setText("");
+        txtValueExpenses.setText("");
     }
 
     //Metodo que me devolvera el nombre del mes segun el numero
@@ -283,13 +384,189 @@ public class MenuStatistics extends javax.swing.JDialog {
         lblEarningsTotal.setText("$ " + String.valueOf(earningsTotal));
     }
 
+    private void saveExpenses() {
+        if (!textAreaDescription.getText().isEmpty() && !txtValueExpenses.getText().isEmpty()) {
+            DAO dao = new ExpensesDAOImpl();
+            Expenses e = new Expenses();
+            e.setCategory(listCategory.getSelectedItem().toString());
+            e.setType(listTypeExpenses.getSelectedItem().toString());
+            e.setDate(new java.sql.Date(dateExpenses.getDate().getTime()));
+            e.setDescription(textAreaDescription.getText());
+            e.setValue(Double.parseDouble(txtValueExpenses.getText()));
+
+            int r = dao.save(e);
+            if (r == 1) {
+                JOptionPane.showMessageDialog(this, "Se registró correctamente.");
+                this.setearFielExpenses();
+                pestanas.setSelectedIndex(1);
+            } else {
+                JOptionPane.showMessageDialog(this, "Se produjo un inconveniente, por favor intente nuevamente.");
+            }
+        }
+    }
+
+    //Metodo que me rellena la tabla, donde recibe una lista con los clientes.
+    private void fillTableListExpenses(List<Expenses> list) {
+        String[] fila = new String[6];
+        list.stream().forEach(e -> {
+            fila[0] = String.valueOf(e.getIdExpenses());
+            fila[1] = e.getCategory();
+            fila[2] = e.getType();
+            fila[3] = e.getDate().toString();
+            fila[4] = e.getDescription();
+            fila[5] = String.valueOf(e.getValue());
+
+            dtm.addRow(fila);
+        });
+        tableListExpenses.setModel(dtm);
+        setearRowWithFinalDate();
+    }
+
+    //Metodo para obtener todos los clientes
+    private void getAllExpenses() {
+        listExpenses = new ExpensesDAOImpl().toList();
+    }
+
+    //Metodo que me buscara el barbero dependiendo la fecha de corte
+    private void getListForDateSinceAndUntil() {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String dateSinceString = sdf.format(dateSinceExpenses.getDate());
+        String dateUntilString = sdf.format(dateUntilExpenses.getDate());
+
+        DAOExpenses dao = new ExpensesDAOImpl();
+
+        this.setearTableListExpenses();
+        this.fillTableListExpenses(dao.queryFilterForDateBetwen(dateSinceString, dateUntilString));
+    }
+
+    private void setearTableListExpenses() {
+        dtm = new DefaultTableModel();
+        String[] columns = {"Id Gasto", "Categoría", "Tipo", "Fecha", "Descripción", "Valor"};
+        dtm.setColumnIdentifiers(columns);
+        tableListExpenses.setModel(dtm);
+
+        //Codigo para aplicarle el formato personalizado al encabezado
+        JTableHeader jth = tableListExpenses.getTableHeader();
+        jth.setDefaultRenderer(new HeaderManagement());
+        tableListExpenses.setTableHeader(jth);
+
+        //Codigo para aplicarme los formatos personalizados
+        tableListExpenses.getColumnModel().getColumn(0).setCellRenderer(new CellManagement());
+        tableListExpenses.getColumnModel().getColumn(1).setCellRenderer(new CellManagement());
+        tableListExpenses.getColumnModel().getColumn(2).setCellRenderer(new CellManagement());
+        tableListExpenses.getColumnModel().getColumn(3).setCellRenderer(new CellManagement());
+        tableListExpenses.getColumnModel().getColumn(4).setCellRenderer(new CellManagement());
+        tableListExpenses.getColumnModel().getColumn(5).setCellRenderer(new CellManagement());
+
+        //Codigo para especificar el tamaño de las celdas
+        tableListExpenses.setRowHeight(25);
+        //Codigo para no poder escribir las celdas
+        tableListExpenses.setDefaultEditor(Object.class, null);
+    }
+
+    //_______________________________________________________________________________________________________
+    //Metodo que me filtrara la tabla, segun lo tipeado
+    private void filterTableListExpenses(String text) {
+        //Lista que me guardara los elementos que contengan lo ingresado
+        listExpensesFinal = new ArrayList<>();
+        if (listExpenses != null || listExpenses.size() > 0) {
+            //Recorremos la lista de todos los clientes
+            listExpenses.stream().forEach(h -> {
+                //Obtenemos algunos datos de este elemento
+                String category = h.getCategory().toLowerCase().toString();
+                String type = h.getType().toLowerCase().toString();
+                String description = h.getDescription().toLowerCase().toString();
+                String date = h.getDate().toString().toLowerCase();
+                //En el caso de el tipo, fecha o descripcion contenga lo tipeado, guardamos el GASTO en una nueva lista
+                if (date.contains(text) || category.contains(text.toLowerCase()) || description.contains(text.toLowerCase()) || type.contains(text.toLowerCase())) {
+                    Expenses e = new Expenses();
+                    e.setIdExpenses(h.getIdExpenses());
+                    e.setCategory(h.getCategory());
+                    e.setType(h.getType());
+                    e.setDate(h.getDate());
+                    e.setDescription(h.getDescription());
+                    e.setValue(h.getValue());
+                    listExpensesFinal.add(e);
+                }
+            });
+        }
+        this.setearTableListExpenses();
+        this.fillTableListExpenses(listExpensesFinal);
+    }
+
+    //_______________________________________________________________________________________________________
+    //Metodo que me agregara los resultados finales en la ultima fila de la tabla
+    private void setearRowWithFinalDate() {
+
+        int row = tableListExpenses.getRowCount();
+        double valueTotalExpenses = 0;
+        if (row > 0) {
+            for (int i = 0; i < row; i++) {
+                valueTotalExpenses += Double.parseDouble(tableListExpenses.getValueAt(i, 5).toString());
+            }
+
+            String[] fila = new String[6];
+            fila[0] = "";
+            fila[1] = "";
+            fila[2] = "";
+            fila[3] = "";
+            fila[4] = "Gastos Total";
+            fila[5] = "$ " + String.valueOf(valueTotalExpenses);
+
+            dtm.addRow(fila);
+            tableListExpenses.setModel(dtm);
+        }
+
+    }
+
+    //______________________________________________________________________________________________________________
+    private void validarCamposTextos(java.awt.event.KeyEvent evt) {
+        char c = evt.getKeyChar();
+        if (Character.isDigit(c)) {
+            getToolkit().beep();
+            evt.consume();
+        }
+    }
+
+    private void validarCamposNumericos(java.awt.event.KeyEvent evt) {
+        char c = evt.getKeyChar();
+        if ((c < '0' || c > '9')) {
+            evt.consume();
+        }
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         groupTypeSearch = new javax.swing.ButtonGroup();
         groupSearchAvanced = new javax.swing.ButtonGroup();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
+        pestanas = new javax.swing.JTabbedPane();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        listCategory = new javax.swing.JComboBox<>();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        textAreaDescription = new javax.swing.JTextArea();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        txtValueExpenses = new javax.swing.JTextField();
+        btnSaveExpenses = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        dateExpenses = new com.toedter.calendar.JDateChooser();
+        listTypeExpenses = new javax.swing.JComboBox<>();
+        jLabel10 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jPanel8 = new javax.swing.JPanel();
+        txtSearchExpenses = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        lblCountCuts = new javax.swing.JLabel();
+        jPanel10 = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        tableListExpenses = new javax.swing.JTable();
+        dateUntilExpenses = new com.toedter.calendar.JDateChooser();
+        dateSinceExpenses = new com.toedter.calendar.JDateChooser();
+        btnSearchExpenses = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         jListYear = new javax.swing.JComboBox<>();
@@ -317,12 +594,267 @@ public class MenuStatistics extends javax.swing.JDialog {
         jLabel9 = new javax.swing.JLabel();
         lblEarningsTotal = new javax.swing.JLabel();
         rbEarningsTotal = new javax.swing.JRadioButton();
-        jPanel1 = new javax.swing.JPanel();
+        jPanel6 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(905, 532));
 
-        jTabbedPane1.setPreferredSize(new java.awt.Dimension(940, 565));
+        pestanas.setPreferredSize(new java.awt.Dimension(940, 565));
+
+        jLabel1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("TIPO");
+
+        listCategory.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        listCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Barbería", "Empleados", "Personal" }));
+        listCategory.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        listCategory.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                listCategoryMouseClicked(evt);
+            }
+        });
+
+        textAreaDescription.setColumns(20);
+        textAreaDescription.setFont(new java.awt.Font("Monospaced", 1, 14)); // NOI18N
+        textAreaDescription.setRows(5);
+        textAreaDescription.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        textAreaDescription.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textAreaDescriptionKeyTyped(evt);
+            }
+        });
+        jScrollPane1.setViewportView(textAreaDescription);
+
+        jLabel2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("DESCRIPCION");
+
+        jLabel5.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel5.setText("VALOR");
+
+        txtValueExpenses.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
+        txtValueExpenses.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtValueExpenses.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        txtValueExpenses.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtValueExpensesKeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtValueExpensesKeyTyped(evt);
+            }
+        });
+
+        btnSaveExpenses.setBackground(new java.awt.Color(0, 153, 204));
+        btnSaveExpenses.setFont(new java.awt.Font("Arial Unicode MS", 3, 14)); // NOI18N
+        btnSaveExpenses.setForeground(new java.awt.Color(255, 255, 255));
+        btnSaveExpenses.setText("GUARDAR");
+        btnSaveExpenses.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        btnSaveExpenses.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveExpensesActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel8.setText("FECHA");
+
+        dateExpenses.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+
+        listTypeExpenses.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        listTypeExpenses.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "- - -" }));
+        listTypeExpenses.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        listTypeExpenses.setEnabled(false);
+
+        jLabel10.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel10.setText("GASTO");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGap(371, 371, 371)
+                            .addComponent(btnSaveExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGap(296, 296, 296)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(txtValueExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
+                                .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(dateExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(listCategory, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(listTypeExpenses, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+                .addContainerGap(269, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(37, 37, 37)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(listCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(listTypeExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(1, 1, 1)
+                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(dateExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtValueExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(btnSaveExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(87, Short.MAX_VALUE))
+        );
+
+        pestanas.addTab("Gastos General", jPanel1);
+
+        jPanel8.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel8.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jPanel8KeyTyped(evt);
+            }
+        });
+
+        txtSearchExpenses.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        txtSearchExpenses.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtSearchExpenses.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 204), 2));
+        txtSearchExpenses.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtSearchExpensesActionPerformed(evt);
+            }
+        });
+        txtSearchExpenses.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtSearchExpensesKeyTyped(evt);
+            }
+        });
+
+        jLabel12.setFont(new java.awt.Font("Arial", 3, 20)); // NOI18N
+        jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel12.setText("BUSCAR POR:");
+        jLabel12.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        lblCountCuts.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
+        lblCountCuts.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(lblCountCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtSearchExpenses)))
+                .addContainerGap())
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtSearchExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblCountCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel10.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
+        tableListExpenses.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        tableListExpenses.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane3.setViewportView(tableListExpenses);
+
+        dateUntilExpenses.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+
+        btnSearchExpenses.setText("BUSCAR");
+        btnSearchExpenses.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchExpensesActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+        jPanel10.setLayout(jPanel10Layout);
+        jPanel10Layout.setHorizontalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 931, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+                .addGap(57, 57, 57)
+                .addComponent(dateSinceExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(61, 61, 61)
+                .addComponent(btnSearchExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(dateUntilExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(61, 61, 61))
+        );
+        jPanel10Layout.setVerticalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(dateSinceExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(dateUntilExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnSearchExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pestanas.addTab("Lista Gastos", jPanel4);
 
         jPanel5.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
@@ -342,7 +874,7 @@ public class MenuStatistics extends javax.swing.JDialog {
         });
 
         dateSince.setDateFormatString("yyyy/MM/dd");
-        dateSince.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        dateSince.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
 
         lblReport.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         lblReport.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -353,7 +885,7 @@ public class MenuStatistics extends javax.swing.JDialog {
         lblStatictisDriagram.setText("DIAGRAMA ESTADÍSTICO");
 
         dateUntil.setDateFormatString("yyyy/MM/dd");
-        dateUntil.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        dateUntil.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
 
         groupTypeSearch.add(rbSearchReport);
         rbSearchReport.setText("CONFIRMAR");
@@ -386,7 +918,7 @@ public class MenuStatistics extends javax.swing.JDialog {
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGap(115, 115, 115)
                         .addComponent(rbSearchReport)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 97, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                         .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -476,16 +1008,16 @@ public class MenuStatistics extends javax.swing.JDialog {
         });
 
         groupSearchAvanced.add(rbEarningsLupos);
-        rbEarningsLupos.setText("CONFIRMAR");
+        rbEarningsLupos.setText("CONFIRMAR GANANCIAS LUPO");
 
         groupSearchAvanced.add(rbCutsAdult);
-        rbCutsAdult.setText("CONFIRMAR");
+        rbCutsAdult.setText("CONFIRMAR CORTES");
 
         groupSearchAvanced.add(rbCutsBeard);
-        rbCutsBeard.setText("CONFIRMAR");
+        rbCutsBeard.setText("CONFIRMAR BARBAS");
 
         groupSearchAvanced.add(rbCutsDrawing);
-        rbCutsDrawing.setText("CONFIRMAR");
+        rbCutsDrawing.setText("CONFIRMAR DIBUJOS");
 
         jLabel9.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
         jLabel9.setText("Ganancias Total:");
@@ -497,7 +1029,7 @@ public class MenuStatistics extends javax.swing.JDialog {
         lblEarningsTotal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
 
         groupSearchAvanced.add(rbEarningsTotal);
-        rbEarningsTotal.setText("CONFIRMAR");
+        rbEarningsTotal.setText("CONFIRMAR GANANCIAS TOTAL");
 
         javax.swing.GroupLayout panelStatisticsLayout = new javax.swing.GroupLayout(panelStatistics);
         panelStatistics.setLayout(panelStatisticsLayout);
@@ -521,86 +1053,84 @@ public class MenuStatistics extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(73, 73, 73)
-                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(rbCutsAdult)
-                            .addComponent(rbEarningsLupos)
-                            .addComponent(rbEarningsTotal))
-                        .addContainerGap(229, Short.MAX_VALUE))
+                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(rbEarningsTotal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(rbEarningsLupos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(rbCutsAdult, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap(159, Short.MAX_VALUE))
                     .addGroup(panelStatisticsLayout.createSequentialGroup()
                         .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelStatisticsLayout.createSequentialGroup()
-                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(panelStatisticsLayout.createSequentialGroup()
                                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(73, 73, 73)
-                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(rbCutsDrawing)
-                            .addComponent(rbCutsBeard))
+                                .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(73, 73, 73)
+                                .addComponent(rbCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(panelStatisticsLayout.createSequentialGroup()
+                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(73, 73, 73)
+                                .addComponent(rbCutsDrawing))
+                            .addGroup(panelStatisticsLayout.createSequentialGroup()
+                                .addGap(287, 287, 287)
+                                .addComponent(btnOpenGraphics, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))))
-            .addGroup(panelStatisticsLayout.createSequentialGroup()
-                .addGap(297, 297, 297)
-                .addComponent(btnOpenGraphics, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
         );
         panelStatisticsLayout.setVerticalGroup(
             panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelStatisticsLayout.createSequentialGroup()
+                .addGap(36, 36, 36)
                 .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelStatisticsLayout.createSequentialGroup()
-                        .addGap(13, 13, 13)
-                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelStatisticsLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(rbEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(27, 27, 27)
+                    .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(rbEarningsTotal, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelStatisticsLayout.createSequentialGroup()
-                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblEarningsLupos, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(27, 27, 27)
-                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblEarningsLupos, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(rbEarningsLupos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(11, 11, 11)
+                .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelStatisticsLayout.createSequentialGroup()
-                        .addComponent(rbEarningsLupos, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(28, 28, 28)
-                        .addComponent(rbCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(17, 17, 17)))
-                .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(panelStatisticsLayout.createSequentialGroup()
+                        .addGap(1, 1, 1)
+                        .addComponent(rbCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(7, 7, 7)
+                .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelStatisticsLayout.createSequentialGroup()
                         .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(27, 27, 27)
+                        .addGap(3, 3, 3))
+                    .addGroup(panelStatisticsLayout.createSequentialGroup()
+                        .addGap(3, 3, 3)
+                        .addComponent(rbCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(panelStatisticsLayout.createSequentialGroup()
                         .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 4, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelStatisticsLayout.createSequentialGroup()
-                        .addGap(3, 3, 3)
-                        .addComponent(rbCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(28, 28, 28)
+                        .addGap(4, 4, 4)
                         .addComponent(rbCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(15, 15, 15)
                 .addComponent(btnOpenGraphics, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 73, Short.MAX_VALUE))
+                .addGap(0, 96, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(panelStatistics, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 909, Short.MAX_VALUE)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(1, 1, 1))
+            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(panelStatistics, javax.swing.GroupLayout.DEFAULT_SIZE, 935, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -610,30 +1140,30 @@ public class MenuStatistics extends javax.swing.JDialog {
                 .addComponent(panelStatistics, javax.swing.GroupLayout.PREFERRED_SIZE, 369, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jTabbedPane1.addTab("Estadísticas Lupo's", jPanel3);
+        pestanas.addTab("Estadísticas Cortes", jPanel3);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 935, Short.MAX_VALUE)
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 537, Short.MAX_VALUE)
         );
 
-        jTabbedPane1.addTab("Gastos General", jPanel1);
+        pestanas.addTab("Estadísticas General", jPanel6);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(pestanas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(pestanas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -658,24 +1188,81 @@ public class MenuStatistics extends javax.swing.JDialog {
         this.generateReporAndStadisticGraphics(evt.getActionCommand());
     }//GEN-LAST:event_btnSearchActionPerformed
 
+    private void btnSaveExpensesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveExpensesActionPerformed
+        this.saveExpenses();
+    }//GEN-LAST:event_btnSaveExpensesActionPerformed
+
+    private void txtValueExpensesKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtValueExpensesKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            this.saveExpenses();
+        }
+    }//GEN-LAST:event_txtValueExpensesKeyPressed
+
+    private void txtValueExpensesKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtValueExpensesKeyTyped
+        validarCamposNumericos(evt);
+    }//GEN-LAST:event_txtValueExpensesKeyTyped
+
+    private void textAreaDescriptionKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textAreaDescriptionKeyTyped
+
+    }//GEN-LAST:event_textAreaDescriptionKeyTyped
+
+    private void txtSearchExpensesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchExpensesActionPerformed
+
+    }//GEN-LAST:event_txtSearchExpensesActionPerformed
+
+    private void txtSearchExpensesKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchExpensesKeyTyped
+        filterTableListExpenses(txtSearchExpenses.getText());
+    }//GEN-LAST:event_txtSearchExpensesKeyTyped
+
+    private void jPanel8KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jPanel8KeyTyped
+
+    }//GEN-LAST:event_jPanel8KeyTyped
+
+    private void btnSearchExpensesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchExpensesActionPerformed
+        this.getListForDateSinceAndUntil();
+    }//GEN-LAST:event_btnSearchExpensesActionPerformed
+
+    private void listCategoryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listCategoryMouseClicked
+    }//GEN-LAST:event_listCategoryMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnOpenGraphics;
+    private javax.swing.JButton btnSaveExpenses;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnSearchExpenses;
+    private com.toedter.calendar.JDateChooser dateExpenses;
     private com.toedter.calendar.JDateChooser dateSince;
+    private com.toedter.calendar.JDateChooser dateSinceExpenses;
     private com.toedter.calendar.JDateChooser dateUntil;
+    private com.toedter.calendar.JDateChooser dateUntilExpenses;
     private javax.swing.ButtonGroup groupSearchAvanced;
     private javax.swing.ButtonGroup groupTypeSearch;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JComboBox<String> jListYear;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JLabel lblCountCuts;
+    private javax.swing.JLabel lblCountCuts1;
     private javax.swing.JLabel lblCutsAdult;
     private javax.swing.JLabel lblCutsBeard;
     private javax.swing.JLabel lblCutsDrawing;
@@ -683,7 +1270,10 @@ public class MenuStatistics extends javax.swing.JDialog {
     private javax.swing.JLabel lblEarningsTotal;
     private javax.swing.JLabel lblReport;
     private javax.swing.JLabel lblStatictisDriagram;
+    private javax.swing.JComboBox<String> listCategory;
+    private javax.swing.JComboBox<String> listTypeExpenses;
     private javax.swing.JPanel panelStatistics;
+    private javax.swing.JTabbedPane pestanas;
     private javax.swing.JRadioButton rbCutsAdult;
     private javax.swing.JRadioButton rbCutsBeard;
     private javax.swing.JRadioButton rbCutsDrawing;
@@ -691,5 +1281,10 @@ public class MenuStatistics extends javax.swing.JDialog {
     private javax.swing.JRadioButton rbEarningsTotal;
     private javax.swing.JRadioButton rbSearchDiagram;
     private javax.swing.JRadioButton rbSearchReport;
+    private javax.swing.JTable tableListExpenses;
+    private javax.swing.JTextArea textAreaDescription;
+    private javax.swing.JTextField txtSearchBarber1;
+    private javax.swing.JTextField txtSearchExpenses;
+    private javax.swing.JTextField txtValueExpenses;
     // End of variables declaration//GEN-END:variables
 }

@@ -191,10 +191,17 @@
           </SubComponents>
         </Container>
         <Component class="com.toedter.calendar.JDateChooser" name="dateUntil">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Arial" size="12" style="1"/>
+            </Property>
+          </Properties>
         </Component>
         <Component class="com.toedter.calendar.JDateChooser" name="dateSince">
           <Properties>
-            <Property name="dateFormatString" type="java.lang.String" value="dd/MM/yyyy"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Arial" size="12" style="1"/>
+            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="btnSearchBarberDate">

@@ -134,7 +134,7 @@ public class MenuBarber extends javax.swing.JDialog {
         if (listBarber != null || listBarber.size() > 0) {
             listBarber.stream().forEach(c -> {
                 String name = c.getName().toLowerCase();
-                String lastName = c.getLastName();
+                String lastName = c.getLastName().toLowerCase();
                 String dni = String.valueOf(c.getDni());
                 if (name.contains(text.toLowerCase()) || lastName.contains(text.toLowerCase()) || dni.contains(text)) {
                     Barber barber = new Barber();
@@ -234,7 +234,7 @@ public class MenuBarber extends javax.swing.JDialog {
             b.setPhone(txtPhoneModif.getText());
             b.setDateEntry(new java.sql.Date(dateEntryModif.getDate().getTime()));
             b.setAddress(txtAddressModif.getText());
-            b.setBirthday(new java.sql.Date(birthday.getDate().getTime()));
+            b.setBirthday(new java.sql.Date(birthdayModif.getDate().getTime()));
             int r = dao.modificar(Integer.parseInt(txtSearchBarberModif.getText()), b);
             if (r == 1) {
                 JOptionPane.showMessageDialog(this, "El barbero " + txtNameModif.getText() + " se modificó correctamente.");
