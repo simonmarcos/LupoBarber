@@ -655,8 +655,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
         tablaCumpleanos1 = new javax.swing.JTable();
         panelLogoLupos = new javax.swing.JPanel();
         logoLuposBarber = new javax.swing.JLabel();
-        btnCambiarTema5 = new javax.swing.JButton();
-        btnCambiarTema6 = new javax.swing.JButton();
         miLamina5 = new javax.swing.JPanel();
         btnBarber = new javax.swing.JButton();
         btnCuts = new javax.swing.JButton();
@@ -1123,49 +1121,17 @@ public class MenuPrincipal extends javax.swing.JFrame {
         panelLogoLupos.setBackground(new java.awt.Color(255, 255, 255));
         panelLogoLupos.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        btnCambiarTema5.setBackground(new java.awt.Color(0, 0, 0));
-        btnCambiarTema5.setFont(new java.awt.Font("Arial Unicode MS", 1, 18)); // NOI18N
-        btnCambiarTema5.setForeground(new java.awt.Color(255, 255, 255));
-        btnCambiarTema5.setText("GUARDAR BASE DE DATOS");
-        btnCambiarTema5.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        btnCambiarTema5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCambiarTema5ActionPerformed(evt);
-            }
-        });
-
-        btnCambiarTema6.setBackground(new java.awt.Color(0, 0, 0));
-        btnCambiarTema6.setFont(new java.awt.Font("Arial Unicode MS", 1, 18)); // NOI18N
-        btnCambiarTema6.setForeground(new java.awt.Color(255, 255, 255));
-        btnCambiarTema6.setText("CARGAR BASE DE DATAOS");
-        btnCambiarTema6.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        btnCambiarTema6.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCambiarTema6ActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout panelLogoLuposLayout = new javax.swing.GroupLayout(panelLogoLupos);
         panelLogoLupos.setLayout(panelLogoLuposLayout);
         panelLogoLuposLayout.setHorizontalGroup(
             panelLogoLuposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelLogoLuposLayout.createSequentialGroup()
                 .addComponent(logoLuposBarber, javax.swing.GroupLayout.DEFAULT_SIZE, 740, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelLogoLuposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnCambiarTema5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCambiarTema6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                .addGap(279, 279, 279))
         );
         panelLogoLuposLayout.setVerticalGroup(
             panelLogoLuposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(logoLuposBarber, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLogoLuposLayout.createSequentialGroup()
-                .addContainerGap(81, Short.MAX_VALUE)
-                .addComponent(btnCambiarTema5, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnCambiarTema6, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+            .addComponent(logoLuposBarber, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
         );
 
         miLamina5.setBackground(new java.awt.Color(255, 255, 255));
@@ -1187,6 +1153,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnCuts.setForeground(new java.awt.Color(255, 255, 255));
         btnCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153), 4));
         btnCuts.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnCuts.setEnabled(false);
         btnCuts.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCutsActionPerformed(evt);
@@ -1247,7 +1214,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(40, 40, 40)
                 .addComponent(btnBarber, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(11, 11, 11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(40, 40, 40)
                 .addComponent(btnCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1280,6 +1247,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         combolistAllClient.setEditable(true);
         combolistAllClient.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         combolistAllClient.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        combolistAllClient.setEnabled(false);
 
         lblClientSection.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         lblClientSection.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -1299,6 +1267,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         combolistAllBarber.setEditable(true);
         combolistAllBarber.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         combolistAllBarber.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        combolistAllBarber.setEnabled(false);
         combolistAllBarber.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 combolistAllBarberActionPerformed(evt);
@@ -1311,6 +1280,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnConfirm.setText("CONFIRMAR");
         btnConfirm.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         btnConfirm.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnConfirm.setEnabled(false);
         btnConfirm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnConfirmActionPerformed(evt);
@@ -1335,6 +1305,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnSaveTotalCuts.setText("GUARDAR");
         btnSaveTotalCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         btnSaveTotalCuts.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnSaveTotalCuts.setEnabled(false);
         btnSaveTotalCuts.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveTotalCutsActionPerformed(evt);
@@ -1374,6 +1345,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnUpdate.setText("ACTUALIZAR");
         btnUpdate.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         btnUpdate.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUpdate.setEnabled(false);
         btnUpdate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateActionPerformed(evt);
@@ -1564,14 +1536,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jFrame2formKeyPressed
 
-    private void btnCambiarTema5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCambiarTema5ActionPerformed
-
-    }//GEN-LAST:event_btnCambiarTema5ActionPerformed
-
-    private void btnCambiarTema6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCambiarTema6ActionPerformed
-
-    }//GEN-LAST:event_btnCambiarTema6ActionPerformed
-
     private void btnBarberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBarberActionPerformed
         while (true) {
             String pass = JOptionPane.showInputDialog(this, "Ingrese la contraseña para ingresar");
@@ -1669,8 +1633,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton btnCambiarTema2;
     private javax.swing.JButton btnCambiarTema3;
     private javax.swing.JButton btnCambiarTema4;
-    private javax.swing.JButton btnCambiarTema5;
-    private javax.swing.JButton btnCambiarTema6;
     private javax.swing.JButton btnClient;
     private javax.swing.JButton btnConfirm;
     private javax.swing.JButton btnCuts;

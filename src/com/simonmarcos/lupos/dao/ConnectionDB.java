@@ -35,6 +35,7 @@ public class ConnectionDB {
                 isConected = true;
             } catch (SQLException ex1) {
                 JOptionPane.showMessageDialog(null, "No se pudo conectar a la base de datos.");
+
             }
         }
         return c;
