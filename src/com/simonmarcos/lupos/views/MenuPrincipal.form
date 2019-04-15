@@ -1110,26 +1110,24 @@
                           </Group>
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" attributes="0">
-                                  <Component id="lblCutsAdult" min="-2" pref="169" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
-                                  <Component id="lblCutsBoy" min="-2" pref="169" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
-                                  <Component id="lblCutsBeard" min="-2" pref="169" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="lblCutsDraw" min="-2" pref="169" max="-2" attributes="0"/>
-                                  <EmptySpace max="32767" attributes="0"/>
-                              </Group>
+                          <Group type="103" groupAlignment="1" attributes="0">
                               <Group type="102" alignment="1" attributes="0">
                                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                   <Component id="btnSaveTotalCuts" min="-2" pref="336" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="161" max="-2" attributes="0"/>
+                                  <EmptySpace min="-2" pref="124" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Component id="lblCutsAdult" min="-2" pref="215" max="-2" attributes="0"/>
+                                  <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
+                                  <Component id="lblCutsBeard" min="-2" pref="215" max="-2" attributes="0"/>
+                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Component id="lblCutsDraw" min="-2" pref="215" max="-2" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
                               </Group>
                           </Group>
-                          <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                              <Component id="lblEarningsTotal" pref="223" max="32767" attributes="0"/>
-                              <Component id="lblEarnings" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="lblEarnings" pref="260" max="32767" attributes="0"/>
+                              <Component id="lblEarningsTotal" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -1139,10 +1137,10 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="1" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="1" attributes="0">
+                      <Group type="102" attributes="0">
                           <Component id="lblCutsSection" min="-2" pref="30" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="checkCutAdult" min="-2" pref="40" max="-2" attributes="0"/>
@@ -1152,36 +1150,37 @@
                               <Component id="checkCutBeard" alignment="1" min="-2" pref="40" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <Group type="102" alignment="1" attributes="0">
-                          <Component id="lblBarberSection" min="-2" pref="30" max="-2" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Component id="lblBarberSection" min="-2" pref="30" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="combolistAllBarber" min="-2" pref="40" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="lblClientSection" min="-2" pref="30" max="-2" attributes="0"/>
+                              </Group>
+                              <Component id="btnConfirm" alignment="1" min="-2" pref="83" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="combolistAllClient" alignment="3" min="-2" pref="40" max="-2" attributes="0"/>
+                              <Component id="btnUpdate" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
+                          </Group>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="combolistAllBarber" min="-2" pref="40" max="-2" attributes="0"/>
+                          <Component id="jScrollPane3" min="-2" pref="232" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="lblClientSection" min="-2" pref="30" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="lblCutsBeard" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
+                              <Component id="lblCutsAdult" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
+                              <Component id="lblCutsDraw" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
+                              <Component id="lblEarnings" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="btnSaveTotalCuts" alignment="0" min="-2" pref="39" max="-2" attributes="0"/>
+                              <Component id="lblEarningsTotal" min="-2" pref="42" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
-                      <Component id="btnConfirm" alignment="1" min="-2" pref="83" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="combolistAllClient" alignment="3" min="-2" pref="40" max="-2" attributes="0"/>
-                      <Component id="btnUpdate" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jScrollPane3" min="-2" pref="232" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="103" alignment="0" groupAlignment="3" attributes="0">
-                          <Component id="lblCutsBoy" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
-                          <Component id="lblCutsBeard" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
-                          <Component id="lblCutsAdult" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
-                          <Component id="lblCutsDraw" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
-                      </Group>
-                      <Component id="lblEarnings" min="-2" pref="42" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="btnSaveTotalCuts" alignment="0" min="-2" pref="39" max="-2" attributes="0"/>
-                      <Component id="lblEarningsTotal" min="-2" pref="42" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -1382,18 +1381,6 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveTotalCutsActionPerformed"/>
           </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="lblCutsBoy">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Arial" size="18" style="1"/>
-            </Property>
-            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="0" green="0" red="cc" type="rgb"/>
-            </Property>
-            <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="jLabel9"/>
-          </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lblCutsBeard">
           <Properties>

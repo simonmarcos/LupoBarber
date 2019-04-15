@@ -6,12 +6,14 @@ public class Cuts {
     private String type;
     private double price;
     private double priceBarber;
+    private double prize;
 
-    public Cuts(int idCuts, String type, double price, double priceBarber) {
+    public Cuts(int idCuts, String type, double price, double priceBarber, double prize) {
         this.idCuts = idCuts;
         this.type = type;
         this.price = price;
         this.priceBarber = priceBarber;
+        this.prize = prize;
     }
 
     public Cuts() {
@@ -23,6 +25,14 @@ public class Cuts {
 
     public void setIdCuts(int idCuts) {
         this.idCuts = idCuts;
+    }
+
+    public double getPrize() {
+        return prize;
+    }
+
+    public void setPrize(double prize) {
+        this.prize = prize;
     }
 
     public String getType() {

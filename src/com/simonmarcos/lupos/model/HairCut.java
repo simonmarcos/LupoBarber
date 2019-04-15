@@ -2,7 +2,7 @@ package com.simonmarcos.lupos.model;
 
 import java.sql.Timestamp;
 
-public class HairCut {
+public class HairCut implements Comparable<HairCut> {
 
     private int idHairCut;
     private Client client;
@@ -92,6 +92,11 @@ public class HairCut {
     @Override
     public String toString() {
         return "HairCut{" + "idHairCut=" + idHairCut + ", client=" + client + ", barber=" + barber + ", cuts=" + cuts + ", date=" + date + ", price=" + price + '}';
+    }
+
+    @Override
+    public int compareTo(HairCut o) {
+        return this.getDate().compareTo(o.getDate());
     }
 
 }

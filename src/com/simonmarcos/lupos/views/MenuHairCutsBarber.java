@@ -139,7 +139,6 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
                 String lastName = searchClientByID(h.getClient().getIdClient())[1].toLowerCase();
                 String typeCut = h.getCuts().toLowerCase();
                 String date = h.getDate().toString().toLowerCase();
-                System.out.println(text);
                 if (date.contains(text) || name.contains(text.toLowerCase()) || lastName.contains(text.toLowerCase()) || typeCut.contains(text.toLowerCase())) {
                     HairCut hairCut = new HairCut();
                     hairCut.setDate(h.getDate());

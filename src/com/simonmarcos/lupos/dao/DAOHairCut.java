@@ -10,4 +10,8 @@ public interface DAOHairCut extends DAO<HairCut> {
     public List<HairCut> queryFilterForDateBetwen(int idBarber, String since, String until);
 
     public double queryGetEarningsTotal(String since, String until);
+
+    public int savePrizeBarber(HairCut o);
+
+    public int deleteByDate(String date);
 }

@@ -8,6 +8,7 @@ import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +17,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
@@ -42,11 +44,11 @@ public class MenuBarber extends javax.swing.JDialog {
         this.setTitle("Menu Barberos");
         this.setearTableBarber();
         this.getAllBarberDB();
+        this.setearDateEntry();
         this.setImgBtnSaveBarber();
         this.setImgBtnClearFields();
         this.setImgBtnSearch();
         this.setImgBtnUpdate();
-        this.setearDateEntry();
         pestanas.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -226,21 +228,28 @@ public class MenuBarber extends javax.swing.JDialog {
     private void updateBarber() {
 
         if (!txtSearchBarberModif.getText().isEmpty()) {
-            DAOBarber dao = new BarberDAOImpl();
-            Barber b = new Barber();
-            b.setName(txtNameModif.getText());
-            b.setLastName(txtLastNameModif.getText());
-            b.setDni(Integer.parseInt(txtDNIModif.getText()));
-            b.setPhone(txtPhoneModif.getText());
-            b.setDateEntry(new java.sql.Date(dateEntryModif.getDate().getTime()));
-            b.setAddress(txtAddressModif.getText());
-            b.setBirthday(new java.sql.Date(birthdayModif.getDate().getTime()));
-            int r = dao.modificar(Integer.parseInt(txtSearchBarberModif.getText()), b);
-            if (r == 1) {
-                JOptionPane.showMessageDialog(this, "El barbero " + txtNameModif.getText() + " se modificó correctamente.");
-                pestanas.setSelectedIndex(0);
+            if (!txtNameModif.getText().isEmpty() && !txtLastNameModif.getText().isEmpty() && !txtDNIModif.getText().isEmpty() && !txtAddressModif.getText().isEmpty()
+                    && !txtPhoneModif.getText().isEmpty()) {
+
+                DAOBarber dao = new BarberDAOImpl();
+                Barber b = new Barber();
+                b.setName(txtNameModif.getText());
+                b.setLastName(txtLastNameModif.getText());
+                b.setDni(Integer.parseInt(txtDNIModif.getText()));
+                b.setPhone(txtPhoneModif.getText());
+                b.setDateEntry(new java.sql.Date(dateEntryModif.getDate().getTime()));
+                b.setAddress(txtAddressModif.getText());
+                b.setBirthday(new java.sql.Date(birthdayModif.getDate().getTime()));
+                int r = dao.modificar(Integer.parseInt(txtSearchBarberModif.getText()), b);
+                if (r == 1) {
+                    JOptionPane.showMessageDialog(this, "El barbero " + txtNameModif.getText() + " se modificó correctamente.");
+                    pestanas.setSelectedIndex(0);
+                } else {
+                    System.out.println(r);
+                    JOptionPane.showMessageDialog(this, "No se pudo realizar la modificación del barbero.");
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "No se pudo realizar la modificación del barbero.");
+                JOptionPane.showMessageDialog(this, "Debe completar todos los campos.");
             }
         }
     }
@@ -270,6 +279,8 @@ public class MenuBarber extends javax.swing.JDialog {
             Image imgSearch = ImageIO.read(getClass().getResource("/img/logoSave.png"));
             Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnSaveBarber.getWidth(), btnSaveBarber.getHeight(), Image.SCALE_DEFAULT));
             btnSaveBarber.setIcon(iconSearch);
+            btnSaveBarber.setHorizontalTextPosition(SwingConstants.CENTER);
+            btnSaveBarber.setVerticalTextPosition(SwingConstants.BOTTOM);
 
         } catch (IOException ex) {
             Logger.getLogger(MenuBarber.class.getName()).log(Level.SEVERE, null, ex);
@@ -357,11 +368,15 @@ public class MenuBarber extends javax.swing.JDialog {
     }
 
     private void setearDateEntry() {
-
         dateEntry.setDateFormatString("dd-MM-yyyy");
         dateEntryModif.setDateFormatString("dd-MM-yyyy");
         birthday.setDateFormatString("dd-MM-yyyy");
         birthdayModif.setDateFormatString("dd-MM-yyyy");
+
+        dateEntry.setDate(new Date());
+        dateEntryModif.setDate(new Date());
+        birthday.setDate(new Date());
+        birthdayModif.setDate(new Date());
 
         JTextFieldDateEditor editorDateEntry = (JTextFieldDateEditor) dateEntry.getDateEditor();
         editorDateEntry.setEditable(false);
@@ -587,6 +602,7 @@ public class MenuBarber extends javax.swing.JDialog {
         });
 
         btnSaveBarber.setBackground(new java.awt.Color(255, 255, 255));
+        btnSaveBarber.setText("GUARDAR");
         btnSaveBarber.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 204), 2));
         btnSaveBarber.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnSaveBarber.addActionListener(new java.awt.event.ActionListener() {
@@ -690,7 +706,7 @@ public class MenuBarber extends javax.swing.JDialog {
                     .addGroup(pestanaRegisterLayout.createSequentialGroup()
                         .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(birthday, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(birthday, javax.swing.GroupLayout.PREFERRED_SIZE, 480, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(71, 71, 71)
                 .addGroup(pestanaRegisterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnClearFields, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1170,9 +1186,6 @@ public class MenuBarber extends javax.swing.JDialog {
         if (evt.getKeyChar() == 'm' && evt.isAltDown()) {
             quickModification();
         }
-        if (evt.getKeyChar() == 'd' && evt.isAltDown()) {
-            quickDelete();
-        }
         if (evt.isAltDown() && evt.getKeyChar() == 'c') {
             MenuHairCutsBarber mhb = new MenuHairCutsBarber(null, true, this.getIdBarberForSendHairCut());
             mhb.setVisible(true);
@@ -1193,7 +1206,7 @@ public class MenuBarber extends javax.swing.JDialog {
     }//GEN-LAST:event_txtPhoneModifKeyPressed
 
     private void txtPhoneModifKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPhoneModifKeyTyped
-        // TODO add your handling code here:
+        validarCamposNumericos(evt);
     }//GEN-LAST:event_txtPhoneModifKeyTyped
 
     private void dateEntryModifKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_dateEntryModifKeyTyped

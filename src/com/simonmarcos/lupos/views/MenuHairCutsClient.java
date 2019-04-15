@@ -7,6 +7,7 @@ import com.simonmarcos.lupos.model.HairCut;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
@@ -33,7 +34,7 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
     //_____________________ METODOS PARA MANIPULAR LA TABLA DE CORTE DE PELOS __________________________
     private void setearTableHairCuts() {
         dtm = new DefaultTableModel();
-        String[] columns = {"Fecha Corte", "Barbero", "Tipo Corte", "Precio"};
+        String[] columns = {"Id Corte", "Fecha Corte", "Barbero", "Tipo Corte", "Precio"};
         dtm.setColumnIdentifiers(columns);
         tableHairCutsClient.setModel(dtm);
 
@@ -47,6 +48,7 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
         tableHairCutsClient.getColumnModel().getColumn(1).setCellRenderer(new CellManagement());
         tableHairCutsClient.getColumnModel().getColumn(2).setCellRenderer(new CellManagement());
         tableHairCutsClient.getColumnModel().getColumn(3).setCellRenderer(new CellManagement());
+        tableHairCutsClient.getColumnModel().getColumn(4).setCellRenderer(new CellManagement());
 
         //Codigo para especificar el tamaño de las celdas
         tableHairCutsClient.setRowHeight(25);
@@ -65,12 +67,13 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
     //Metodo que me rellena la tabla, donde recibe una lista con los clientes.
     private void fillTableListHairCuts(List<HairCut> list) {
         if (list.size() > 0) {
-            String[] fila = new String[4];
-            list.stream().forEach(hairCut -> {
-                fila[0] = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(hairCut.getDate());
-                fila[1] = hairCut.getBarber().getLastName() + " " + hairCut.getBarber().getName();
-                fila[2] = hairCut.getCuts();
-                fila[3] = String.valueOf("$ " + hairCut.getPrice());
+            String[] fila = new String[5];
+            list.stream().sorted().forEach(hairCut -> {
+                fila[0] = String.valueOf(hairCut.getIdHairCut());
+                fila[1] = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(hairCut.getDate());
+                fila[2] = hairCut.getBarber().getLastName() + " " + hairCut.getBarber().getName();
+                fila[3] = hairCut.getCuts();
+                fila[4] = String.valueOf("$ " + hairCut.getPrice());
 
                 dtm.addRow(fila);
             });
@@ -108,6 +111,20 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
         }
         this.setearTableHairCuts();
         this.fillTableListHairCuts(listHairCutFinal);
+    }
+
+    private void deleteHairCut() {
+        DAOHairCut dao = new HairCutDAOImpl();
+        int rowSelected = tableHairCutsClient.getSelectedRow();
+        int idHairCut = Integer.parseInt(tableHairCutsClient.getValueAt(rowSelected, 0).toString());
+        int r = dao.delete(idHairCut);
+        if (r == 1) {
+            JOptionPane.showMessageDialog(this, "Se eliminó el corte de pelo");
+            this.setearTableHairCuts();
+            this.getAllHairCutsDeterminateClient();
+        } else {
+            JOptionPane.showMessageDialog(this, "No se pudo eliminar.");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -195,6 +212,11 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
 
             }
         ));
+        tableHairCutsClient.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                tableHairCutsClientKeyPressed(evt);
+            }
+        });
         jScrollPane1.setViewportView(tableHairCutsClient);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -237,6 +259,12 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
     private void txtSearchClientKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchClientKeyTyped
         filterTableHairCuts(txtSearchClient.getText());
     }//GEN-LAST:event_txtSearchClientKeyTyped
+
+    private void tableHairCutsClientKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tableHairCutsClientKeyPressed
+        if (evt.getKeyChar() == 'd' && evt.isAltDown()) {
+            deleteHairCut();
+        }
+    }//GEN-LAST:event_tableHairCutsClientKeyPressed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

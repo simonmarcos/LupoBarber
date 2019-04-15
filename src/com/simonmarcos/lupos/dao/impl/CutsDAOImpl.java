@@ -31,7 +31,7 @@ public class CutsDAOImpl implements DAOCuts {
             c = myConnection.connect();
             if (c != null) {
 
-                String consultaSQL = "INSERT INTO Cuts (idCuts,type,price,priceBarber) VALUES (?,?,?,?)";
+                String consultaSQL = "INSERT INTO Cuts (idCuts,type,price,priceBarber,prize) VALUES (?,?,?,?,?)";
                 PreparedStatement ps = null;
 
                 try {
@@ -41,6 +41,7 @@ public class CutsDAOImpl implements DAOCuts {
                     ps.setString(2, o.getType());
                     ps.setDouble(3, o.getPrice());
                     ps.setDouble(4, o.getPriceBarber());
+                    ps.setDouble(5, o.getPrize());
 
                     r = ps.executeUpdate();
                     ps.close();
@@ -71,12 +72,13 @@ public class CutsDAOImpl implements DAOCuts {
         int r = 0;
         if (c != null) {
             try {
-                String consultaSQL = "UPDATE Cuts SET type = ?, price = ?,priceBarber = ? WHERE idCuts = ?";
+                String consultaSQL = "UPDATE Cuts SET type = ?, price = ?,priceBarber = ?, prize = ? WHERE idCuts = ?";
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ps.setString(1, o.getType());
                 ps.setDouble(2, o.getPrice());
                 ps.setDouble(3, o.getPriceBarber());
-                ps.setInt(4, code);
+                ps.setDouble(3, o.getPrize());
+                ps.setInt(5, code);
 
                 r = ps.executeUpdate();
 
@@ -102,7 +104,7 @@ public class CutsDAOImpl implements DAOCuts {
         List<Cuts> list = null;
         if (c != null) {
             try {
-                String consultaSQL = "SELECT idCuts,type,price,priceBarber FROM Cuts";
+                String consultaSQL = "SELECT idCuts,type,price,priceBarber,prize FROM Cuts";
 
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ResultSet rs = ps.executeQuery();
@@ -114,6 +116,7 @@ public class CutsDAOImpl implements DAOCuts {
                     c.setType(rs.getString("type"));
                     c.setPrice(rs.getDouble("price"));
                     c.setPriceBarber(rs.getDouble("priceBarber"));
+                    c.setPrize(rs.getDouble("prize"));
                     list.add(c);
                 }
 
@@ -169,7 +172,37 @@ public class CutsDAOImpl implements DAOCuts {
                 PreparedStatement ps = c.prepareStatement("SELECT priceBarber FROM Cuts WHERE cuts.`type`= ?");
                 ps.setString(1, name);
 
-                priceBarber = ps.executeUpdate();
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    priceBarber += rs.getDouble("priceBarber");
+                }
+                ps.close();
+                return priceBarber;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    c.close();
+
+                } catch (SQLException ex) {
+                    Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return priceBarber;
+    }
+
+    @Override
+    public double getPrize() {
+        double priceBarber = 0;
+        if (c != null) {
+            try {
+                PreparedStatement ps = c.prepareStatement("SELECT prize FROM Cuts WHERE type='Corte'");
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    priceBarber += rs.getDouble("prize");
+                }
                 ps.close();
                 return priceBarber;
 

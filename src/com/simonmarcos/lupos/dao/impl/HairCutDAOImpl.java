@@ -72,11 +72,11 @@ public class HairCutDAOImpl implements DAOHairCut {
         if (c != null) {
             try {
                 if (name.equalsIgnoreCase("Cliente")) {
-                    consultaSQL += "SELECT `haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`price` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber WHERE idClient = ?";
+                    consultaSQL += "SELECT `haircut`.`idHairCut`,`haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`price`,`haircut`.`priceBarber` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber WHERE idClient = ?";
                 } else if (name.equalsIgnoreCase("Barbero")) {
-                    consultaSQL += "SELECT `haircut`.`date`,`haircut`.`idClient`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`priceBarber`,`haircut`.`price` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber WHERE `haircut`.`idBarber` = ?";
+                    consultaSQL += "SELECT `haircut`.`idHairCut`,`haircut`.`date`,`haircut`.`idClient`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`priceBarber`,`haircut`.`price` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber WHERE `haircut`.`idBarber` = ?";
                 } else {
-                    consultaSQL += "SELECT `haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`priceBarber`,`haircut`.`price` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber";
+                    consultaSQL += "SELECT `haircut`.`idHairCut`,`haircut`.`date`, `barber`.`name`,`barber`.`lastName`, `haircut`.`cuts`,`haircut`.`priceBarber`,`haircut`.`price` FROM HairCut INNER JOIN barber ON `haircut`.`idBarber`= barber.idBarber";
                 }
 
                 if (name.equalsIgnoreCase("Barbero")) {
@@ -87,6 +87,8 @@ public class HairCutDAOImpl implements DAOHairCut {
                         list = new ArrayList<>();
                         while (rs.next()) {
                             HairCut hairCut = new HairCut();
+                            hairCut.setIdHairCut(rs.getInt("idHairCut"));
+                            System.out.println(rs.getInt("idHairCut"));
                             hairCut.setDate(rs.getTimestamp("date"));
 
                             Barber b = new Barber();
@@ -114,6 +116,7 @@ public class HairCutDAOImpl implements DAOHairCut {
                         list = new ArrayList<>();
                         while (rs.next()) {
                             HairCut hairCut = new HairCut();
+                            hairCut.setIdHairCut(rs.getInt("idHairCut"));
                             hairCut.setDate(rs.getTimestamp("date"));
 
                             Barber b = new Barber();
@@ -386,4 +389,63 @@ public class HairCutDAOImpl implements DAOHairCut {
         }  */
         return earningsTotal;
     }
+
+    @Override
+    public int savePrizeBarber(HairCut o) {
+        int r = 0;
+        String consultaSQL = "INSERT INTO HairCut (idHairCut,idClient,idBarber,cuts,date,price,priceBarber) VALUES (?,?,?,?,?,?,?)";
+        PreparedStatement ps = null;
+
+        try {
+            ps = c.prepareStatement(consultaSQL);
+            ps.setInt(1, o.getIdHairCut());
+            ps.setInt(2, 0);
+            ps.setInt(3, o.getBarber().getIdBarber());
+            ps.setString(4, "");
+            ps.setTimestamp(5, o.getDate());
+            ps.setDouble(6, 0);
+            ps.setDouble(7, o.getPriceBarber());
+
+            r = ps.executeUpdate();
+            ps.close();
+            return r;
+
+        } catch (SQLException ex) {
+            Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                c.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return r;
+    }
+
+    @Override
+    public int deleteByDate(String date) {
+        int r = 3;
+        if (c != null) {
+            try {
+                PreparedStatement ps = c.prepareStatement("DELETE FROM HairCut WHERE `haircut`.`date` = ?");
+                ps.setString(1, date);
+
+                r = ps.executeUpdate();
+                ps.close();
+                return r;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
+                return r;
+            } finally {
+                try {
+                    c.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return r;
+    }
+
 }
