@@ -20,15 +20,11 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -37,17 +33,18 @@ import javax.swing.table.JTableHeader;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class MenuPrincipal extends javax.swing.JFrame {
-
+    
     private DefaultTableModel dtm;
     private List<Barber> listAllBarber;
-    private final double prizeCuts = new CutsDAOImpl().getPrize();
+    private double prizeCuts = 0;
     private Map<Integer, String> mapIdBarbers = null;
-
+    
     public MenuPrincipal() {
         initComponents();
         //this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setTitle("Lupo's Barber");
+        prizeCuts = new CutsDAOImpl().getPrize();
         this.dimensionWindows();
         this.setImgBtnClient();
         this.setImgBtnBarber();
@@ -61,45 +58,45 @@ public class MenuPrincipal extends javax.swing.JFrame {
         this.getDateToday();
         this.setearTittles();
         this.calculateBirthDay();
-
+        
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
-
+                
             }
-
+            
             @Override
             public void windowClosing(WindowEvent e) {
                 saveAllCutsOfDay();
             }
-
+            
             @Override
             public void windowClosed(WindowEvent e) {
-
+                
             }
-
+            
             @Override
             public void windowIconified(WindowEvent e) {
-
+                
             }
-
+            
             @Override
             public void windowDeiconified(WindowEvent e) {
-
+                
             }
-
+            
             @Override
             public void windowActivated(WindowEvent e) {
-
+                
             }
-
+            
             @Override
             public void windowDeactivated(WindowEvent e) {
-
+                
             }
         });
     }
-
+    
     private void dimensionWindows() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = (int) screenSize.getWidth();
@@ -107,22 +104,22 @@ public class MenuPrincipal extends javax.swing.JFrame {
         this.setSize(width, height);
         this.setLocation((width - this.getWidth()) / 2, (height - this.getHeight()) / 2);
     }
-
+    
     private String getDateToday() {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         return formatter.format(ts);
     }
-
+    
     private void clearAllFields() {
         checkCutAdult.setSelected(false);
         checkCutBeard.setSelected(false);
         checkCutDrawing.setSelected(false);
-
+        
         combolistAllClient.setSelectedIndex(0);
         combolistAllBarber.setSelectedIndex(0);
     }
-
+    
     private void setearTittles() {
         lblClientSection.setToolTipText("Aquí podremos ver todos los clientes para luego seleccionar el buscado");
         lblBarberSection.setToolTipText("Aquí podremos ver todos los barberos para luego seleccionar el buscado");
@@ -136,7 +133,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnBarber.setToolTipText("Menu con todas las acciones para los barberos");
         btnCuts.setToolTipText("Menu con todas las acciones para las estadísticas del negocio");
     }
-
+    
     private void calculateBirthDay() {
         listAllBarber.forEach(b -> {
             java.sql.Date nowDate = new java.sql.Date(new java.util.Date().getTime());
@@ -182,7 +179,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     //METODOS PARA GUARDAR EL CORTE EN LA BASE DE DATOS
     private void saveCuts() {
         DAOHairCut dao = new HairCutDAOImpl();
-
+        
         String idClient = "";
         String nameClient = "";
         String idBarber = "";
@@ -197,7 +194,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 nameClient += getIdClientForListClient()[i];
             } else if (i == 1) {
                 idClient += getIdClientForListClient()[i];
-
+                
             }
         }
         Client c = new Client();
@@ -211,7 +208,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 idBarber += getIdBarberForListBarber()[i];
             }
         }
-
+        
         Barber b = new Barber();
         b.setIdBarber(Integer.parseInt(idBarber));
 
@@ -230,7 +227,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                     break;
             }
         }
-
+        
         HairCut h = new HairCut();
         h.setClient(c);
         h.setBarber(b);
@@ -249,16 +246,16 @@ public class MenuPrincipal extends javax.swing.JFrame {
     //Metodo que me devolvera el precio total del corte segun los checks seleccionados.
     //Tambien extra, me devolvera los cortes que se realizo
     private String[] getPriceDependingCuts() {
-
+        
         DAOCuts dao = new CutsDAOImpl();
         List<Cuts> listCuts = dao.toList();
-
+        
         String cutsFinal = "";
-
+        
         boolean cutAdultSelected = checkCutAdult.isSelected();
         boolean cutBeardSelected = checkCutBeard.isSelected();
         boolean cutDrawingSelected = checkCutDrawing.isSelected();
-
+        
         double totalPrice = 0;
         double totalPriceBarber = 0;
         //Si solo esta seleccionado el check de CutsAdult
@@ -297,7 +294,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 }
             }
             cutsFinal += checkCutAdult.getText() + " / " + checkCutBeard.getText() + " / " + checkCutDrawing.getText();
-
+            
         }//Si solo esta seleccionado el  checkDrawing
         else if (!cutAdultSelected && !cutBeardSelected && cutDrawingSelected) {
             for (Cuts c : listCuts) {
@@ -364,7 +361,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         //Codigo para no poder escribir las celdas
         tableBarberCuts.setDefaultEditor(Object.class, null);
     }
-
+    
     private void fillTableBarberCuts() {
         String[] fila = new String[5];
         listAllBarber = this.getAllBarber();
@@ -380,18 +377,18 @@ public class MenuPrincipal extends javax.swing.JFrame {
         });
         tableBarberCuts.setModel(dtm);
     }
-
+    
     private List<Barber> getAllBarber() {
         DAOBarber dao = new BarberDAOImpl();
         return dao.toListByNameAndLastName();
     }
-
+    
     private void fillTableBarberHairCutsToday() {
-
+        
         int row = tableBarberCuts.getRowCount();
         DAOHairCut dao = new HairCutDAOImpl();
         List<HairCut> listHairCut = dao.queryFilterForDate(this.getDateToday());
-
+        
         double earningsBoss = 0;
 
         //Recorremos los datos consultados de la base de datos
@@ -405,7 +402,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 String cutsBeard = tableBarberCuts.getValueAt(i, 2).toString();
                 String cutsDrawing = tableBarberCuts.getValueAt(i, 3).toString();
                 String priceCuts = tableBarberCuts.getValueAt(i, 4).toString();
-
+                
                 int countCutsAdult = 0;
                 int countCutsBeard;
                 int countCutsDrawing;
@@ -448,7 +445,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             double totalEarningsBarber = Double.valueOf(tableBarberCuts.getValueAt(i, 4).toString());
             int countPrize = (countCutsAdult / 10) * 10;
             totalEarningsBarber += countPrize;
-
+            
             tableBarberCuts.setValueAt(String.valueOf(totalEarningsBarber), i, 4);
         }
     }
@@ -473,13 +470,13 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 }
                 double totalEarningsBarber = Double.valueOf(tableBarberCuts.getValueAt(i, 4).toString());
                 int countPrize = (countCutsAdult / 10) * 10;
-
+                
                 HairCut hc = new HairCut();
-
+                
                 Barber b = new Barber();
                 b.setIdBarber(idBarber);
                 hc.setBarber(b);
-
+                
                 hc.setDate(new java.sql.Timestamp(System.currentTimeMillis()));
                 hc.setPriceBarber(countPrize);
                 //Lo guardamos en la base de datoss
@@ -487,31 +484,31 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 daoSave.savePrizeBarber(hc);
             }
         }
-
+        
     }
-
+    
     private void updateTableHairCutsBarber() {
         this.setearTableBarberCuts();
         this.fillTableBarberCuts();
         this.fillTableBarberHairCutsToday();
     }
-
+    
     private void getAllCutsAndEarningTheDay(double earnings) {
-
+        
         int row = tableBarberCuts.getRowCount();
-
+        
         int countHairCutsAdult = 0;
         int countHairCutsBeader = 0;
         int countHairCutsDrawing = 0;
         double countEarnings = 0;
-
+        
         for (int i = 0; i < row; i++) {
             countHairCutsAdult += Integer.parseInt(tableBarberCuts.getValueAt(i, 1).toString());
             countHairCutsBeader += Integer.parseInt(tableBarberCuts.getValueAt(i, 2).toString());
             countHairCutsDrawing += Integer.parseInt(tableBarberCuts.getValueAt(i, 3).toString());
             countEarnings += Double.parseDouble(tableBarberCuts.getValueAt(i, 4).toString());
         }
-
+        
         lblCutsAdult.setText("Cortes Adultos: " + countHairCutsAdult);
         lblCutsBeard.setText("Barba: " + countHairCutsBeader);
         lblCutsDraw.setText("Dibujos: " + countHairCutsDrawing);
@@ -535,7 +532,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 combolistAllClient.addItem(c.getLastName() + " " + c.getName() + " - " + c.getIdClient());
             }
         });
-
+        
         combolistAllClient.setSelectedItem("");
         AutoCompleteDecorator.decorate(combolistAllClient);
     }
@@ -547,7 +544,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         listAllBarber.stream().sorted().forEach(c -> {
             combolistAllBarber.addItem(c.getLastName() + " " + c.getName() + " - " + c.getIdBarber());
         });
-
+        
         combolistAllBarber.setSelectedItem("");
         //Metodo para poder escribir y buscar en el JComboBox
         AutoCompleteDecorator.decorate(combolistAllBarber);
@@ -570,51 +567,35 @@ public class MenuPrincipal extends javax.swing.JFrame {
     //______________________________________________________________________________________________________________
     //METODOS PARA COLOCAR IMAGENES A LOS BOTONES
     private void setImgBtnClient() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoClient.png"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnClient.getWidth(), btnClient.getHeight(), Image.SCALE_DEFAULT));
-            btnClient.setIcon(iconSearch);
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuPrincipal.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+        
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoClient.png"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnClient.getWidth(), btnClient.getHeight(), Image.SCALE_DEFAULT));
+        btnClient.setIcon(iconSearch);
+        
     }
-
+    
     private void setImgBtnBarber() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoBarber.png"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnBarber.getWidth(), btnBarber.getHeight(), Image.SCALE_DEFAULT));
-            btnBarber.setIcon(iconSearch);
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuPrincipal.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+        
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoBarber.png"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnBarber.getWidth(), btnBarber.getHeight(), Image.SCALE_DEFAULT));
+        btnBarber.setIcon(iconSearch);
+        
     }
-
+    
     private void setImgPanelLogoLupos() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoLupos.jpg"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(logoLuposBarber.getWidth(), logoLuposBarber.getHeight(), Image.SCALE_DEFAULT));
-            logoLuposBarber.setIcon(iconSearch);
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuPrincipal.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+        
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoLupos.jpg"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(logoLuposBarber.getWidth(), logoLuposBarber.getHeight(), Image.SCALE_DEFAULT));
+        logoLuposBarber.setIcon(iconSearch);
+        
     }
-
+    
     private void setImgBtnStadistics() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/statistics.png"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnCuts.getWidth(), btnCuts.getHeight(), Image.SCALE_DEFAULT));
-            btnCuts.setIcon(iconSearch);
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuPrincipal.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+        
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/statistics.png"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnCuts.getWidth(), btnCuts.getHeight(), Image.SCALE_DEFAULT));
+        btnCuts.setIcon(iconSearch);
+        
     }
 
     //______________________________________________________________________________________________________________
@@ -655,6 +636,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         tablaCumpleanos1 = new javax.swing.JTable();
         panelLogoLupos = new javax.swing.JPanel();
         logoLuposBarber = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         miLamina5 = new javax.swing.JPanel();
         btnBarber = new javax.swing.JButton();
         btnCuts = new javax.swing.JButton();
@@ -1121,17 +1103,34 @@ public class MenuPrincipal extends javax.swing.JFrame {
         panelLogoLupos.setBackground(new java.awt.Color(255, 255, 255));
         panelLogoLupos.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
+        jButton1.setBackground(new java.awt.Color(0, 153, 204));
+        jButton1.setFont(new java.awt.Font("Arial Unicode MS", 3, 14)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jButton1.setText("CORTES");
+        jButton1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelLogoLuposLayout = new javax.swing.GroupLayout(panelLogoLupos);
         panelLogoLupos.setLayout(panelLogoLuposLayout);
         panelLogoLuposLayout.setHorizontalGroup(
             panelLogoLuposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelLogoLuposLayout.createSequentialGroup()
                 .addComponent(logoLuposBarber, javax.swing.GroupLayout.DEFAULT_SIZE, 740, Short.MAX_VALUE)
-                .addGap(279, 279, 279))
+                .addGap(50, 50, 50)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(52, 52, 52))
         );
         panelLogoLuposLayout.setVerticalGroup(
             panelLogoLuposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(logoLuposBarber, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLogoLuposLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         miLamina5.setBackground(new java.awt.Color(255, 255, 255));
@@ -1153,7 +1152,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnCuts.setForeground(new java.awt.Color(255, 255, 255));
         btnCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153), 4));
         btnCuts.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnCuts.setEnabled(false);
         btnCuts.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCutsActionPerformed(evt);
@@ -1504,7 +1502,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_jFrame1formKeyPressed
 
     private void btnCambiarTema3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCambiarTema3ActionPerformed
-
+        
 
     }//GEN-LAST:event_btnCambiarTema3ActionPerformed
 
@@ -1592,7 +1590,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_combolistAllBarberActionPerformed
 
     private void btnConfirmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmActionPerformed
-
+        
         if (!combolistAllClient.getSelectedItem().toString().isEmpty() && !combolistAllBarber.getSelectedItem().toString().isEmpty()) {
             boolean cutAdultSelected = checkCutAdult.isSelected();
             boolean cutBeardSelected = checkCutBeard.isSelected();
@@ -1623,6 +1621,11 @@ public class MenuPrincipal extends javax.swing.JFrame {
         this.updateTableHairCutsBarber();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        MenuCuts mc = new MenuCuts(this, false);
+        mc.setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAntecedentes;
     private javax.swing.JButton btnAntecedentes1;
@@ -1651,6 +1654,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> combolistAllClient;
     private javax.swing.JLabel imgLogo;
     private javax.swing.JLabel imgLogo1;
+    private javax.swing.JButton jButton1;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JFrame jFrame2;
     private javax.swing.JLabel jLabel1;

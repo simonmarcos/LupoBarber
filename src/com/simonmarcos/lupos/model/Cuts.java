@@ -16,6 +16,13 @@ public class Cuts {
         this.prize = prize;
     }
 
+    public Cuts(String type, double price, double priceBarber, double prize) {
+        this.type = type;
+        this.price = price;
+        this.priceBarber = priceBarber;
+        this.prize = prize;
+    }
+
     public Cuts() {
     }
 

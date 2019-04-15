@@ -19,5 +19,15 @@ public class LuposBarber {
         } catch (IOException ex) {
             Logger.getLogger(LuposBarber.class.getName()).log(Level.SEVERE, null, ex);
         }
+//        for (int i = 1001; i < 5000; i++) {
+//            System.out.println(i);
+//            Client client = new Client();
+//            client.setIdClient(5);
+//            Barber barber = new Barber();
+//            barber.setIdBarber(3);
+//
+//            HairCut c = new HairCut(i, client, barber, "Corte", new Timestamp(System.currentTimeMillis()), 200, 90);
+//            new HairCutDAOImpl().save(c);
+//        }
     }
 }

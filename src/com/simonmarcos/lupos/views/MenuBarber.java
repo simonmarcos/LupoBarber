@@ -5,14 +5,11 @@ import com.simonmarcos.lupos.dao.impl.BarberDAOImpl;
 import com.simonmarcos.lupos.model.Barber;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -275,50 +272,38 @@ public class MenuBarber extends javax.swing.JDialog {
     //______________________________________________________________________________________________________________
     //METODOS PARA COLOCAR IMAGENES A LOS BOTONES
     private void setImgBtnSaveBarber() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoSave.png"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnSaveBarber.getWidth(), btnSaveBarber.getHeight(), Image.SCALE_DEFAULT));
-            btnSaveBarber.setIcon(iconSearch);
-            btnSaveBarber.setHorizontalTextPosition(SwingConstants.CENTER);
-            btnSaveBarber.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        } catch (IOException ex) {
-            Logger.getLogger(MenuBarber.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoSave.png"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnSaveBarber.getWidth(), btnSaveBarber.getHeight(), Image.SCALE_DEFAULT));
+        btnSaveBarber.setIcon(iconSearch);
+        btnSaveBarber.setHorizontalTextPosition(SwingConstants.CENTER);
+        btnSaveBarber.setVerticalTextPosition(SwingConstants.BOTTOM);
+
     }
 
     private void setImgBtnClearFields() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoClear.png"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnClearFields.getWidth(), btnClearFields.getHeight(), Image.SCALE_DEFAULT));
-            btnClearFields.setIcon(iconSearch);
 
-        } catch (IOException ex) {
-            Logger.getLogger(MenuBarber.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoClear.png"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnClearFields.getWidth(), btnClearFields.getHeight(), Image.SCALE_DEFAULT));
+        btnClearFields.setIcon(iconSearch);
+
     }
 
     private void setImgBtnSearch() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoSearch.jpg"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnSearchBarber.getWidth(), btnSearchBarber.getHeight(), Image.SCALE_DEFAULT));
-            btnSearchBarber.setIcon(iconSearch);
-            btnFilterBarber.setIcon(iconSearch);
 
-        } catch (IOException ex) {
-            Logger.getLogger(MenuBarber.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoSearch.jpg"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnSearchBarber.getWidth(), btnSearchBarber.getHeight(), Image.SCALE_DEFAULT));
+        btnSearchBarber.setIcon(iconSearch);
+        btnFilterBarber.setIcon(iconSearch);
+
     }
 
     private void setImgBtnUpdate() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoUpdate.jpg"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnUpdateBarber.getWidth(), btnUpdateBarber.getHeight(), Image.SCALE_DEFAULT));
-            btnUpdateBarber.setIcon(iconSearch);
 
-        } catch (IOException ex) {
-            Logger.getLogger(MenuBarber.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoUpdate.jpg"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnUpdateBarber.getWidth(), btnUpdateBarber.getHeight(), Image.SCALE_DEFAULT));
+        btnUpdateBarber.setIcon(iconSearch);
+
     }
 
     //______________________________________________________________________________________________________________

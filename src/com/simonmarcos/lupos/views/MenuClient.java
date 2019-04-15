@@ -5,13 +5,10 @@ import com.simonmarcos.lupos.dao.impl.ClientDAOImpl;
 import com.simonmarcos.lupos.model.Client;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -22,7 +19,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 public class MenuClient extends javax.swing.JDialog {
-    
+
     private DefaultTableModel dtm = null;
 
     //Variable que me guardara la lista de todos los clientes
@@ -47,7 +44,7 @@ public class MenuClient extends javax.swing.JDialog {
         this.setImgBtnUpdate();
         this.setearTittles();
         this.setearDateEntry();
-        
+
         pestanas.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -69,7 +66,7 @@ public class MenuClient extends javax.swing.JDialog {
             }
         });
     }
-    
+
     private void setearTittles() {
         pestanaQuery.setToolTipText("Sección con todos los clientes");
         pestanaUpdate.setToolTipText("Sección para modificar los clientes");
@@ -117,6 +114,7 @@ public class MenuClient extends javax.swing.JDialog {
 
     //Metodo que me rellena la tabla, donde recibe una lista con los clientes.
     private void fillTableListClient(List<Client> list) {
+        lblCountClient.setText("Clientes: " + list.size());
         String[] fila = new String[6];
         list.stream().sorted().forEach(c -> {
             fila[0] = String.valueOf(c.getIdClient());
@@ -129,12 +127,12 @@ public class MenuClient extends javax.swing.JDialog {
             } else {
                 fila[5] = "";
             }
-            
+
             dtm.addRow(fila);
         });
         tableClients.setModel(dtm);
     }
-    
+
     private void clearFieldsPestanaQuery() {
         txtSearchClient.setText("");
     }
@@ -179,10 +177,10 @@ public class MenuClient extends javax.swing.JDialog {
         txtDNI.setText("");
         txtPhone.setText("");
     }
-    
+
     private void saveClient() {
         if (!txtName.getText().isEmpty() && !txtLastName.getText().isEmpty() && !txtDNI.getText().isEmpty()/* && !txtPhone.getText().isEmpty()*/) {
-            
+
             DAOClient dao = new ClientDAOImpl();
             Client c = new Client();
             c.setName(txtName.getText());
@@ -192,9 +190,9 @@ public class MenuClient extends javax.swing.JDialog {
             if (birthday.getDate() != null) {
                 c.setBirthday(new java.sql.Date(birthday.getDate().getTime()));
             }
-            
+
             int r = dao.save(c);
-            
+
             if (r == 1) {
                 JOptionPane.showMessageDialog(this, "El cliente " + txtName.getText() + " se guardó correctamente.");
                 this.clearFieldsRegisterClient();
@@ -217,7 +215,7 @@ public class MenuClient extends javax.swing.JDialog {
         txtSearchClientModif.setText("");
         birthdayModif.setDate(null);
     }
-    
+
     private void clearFieldsUpdateClientWithoutSearch() {
         txtIdClientModif.setText("");
         txtNameModif.setText("");
@@ -226,9 +224,9 @@ public class MenuClient extends javax.swing.JDialog {
         txtPhoneModif.setText("");
         birthdayModif.setDate(null);
     }
-    
+
     private void updateClient() {
-        
+
         if (!txtSearchClientModif.getText().isEmpty()) {
             DAOClient dao = new ClientDAOImpl();
             Client c = new Client();
@@ -240,7 +238,7 @@ public class MenuClient extends javax.swing.JDialog {
                 System.out.println("ENTRO");
                 c.setBirthday(new java.sql.Date(birthdayModif.getDate().getTime()));
             }
-            
+
             int r = dao.modificar(Integer.parseInt(txtSearchClientModif.getText()), c);
             if (r == 1) {
                 JOptionPane.showMessageDialog(this, "El cliente " + txtNameModif.getText() + " se modificó correctamente.");
@@ -262,7 +260,7 @@ public class MenuClient extends javax.swing.JDialog {
                     txtLastNameModif.setText(c.getLastName());
                     txtDNIModif.setText(String.valueOf(c.getDNI()));
                     txtPhoneModif.setText(c.getPhone());
-                    birthday.setDate(c.getBirthday());
+                    birthdayModif.setDate(c.getBirthday());
                     break;
                 } else {
                     lblDNINotFound.setText("El DNI no se encuentra registrado.");
@@ -290,52 +288,36 @@ public class MenuClient extends javax.swing.JDialog {
     //______________________________________________________________________________________________________________
     //METODOS PARA COLOCAR IMAGENES A LOS BOTONES
     private void setImgBtnSaveClient() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoSave.png"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnSaveClient.getWidth(), btnSaveClient.getHeight(), Image.SCALE_DEFAULT));
-            btnSaveClient.setIcon(iconSearch);
-            
-        } catch (IOException ex) {
-            Logger.getLogger(MenuClient.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoSave.png"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnSaveClient.getWidth(), btnSaveClient.getHeight(), Image.SCALE_DEFAULT));
+        btnSaveClient.setIcon(iconSearch);
+
     }
-    
+
     private void setImgBtnClearFields() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoClear.png"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnClearFields.getWidth(), btnClearFields.getHeight(), Image.SCALE_DEFAULT));
-            btnClearFields.setIcon(iconSearch);
-            
-        } catch (IOException ex) {
-            Logger.getLogger(MenuClient.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoClear.png"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnClearFields.getWidth(), btnClearFields.getHeight(), Image.SCALE_DEFAULT));
+        btnClearFields.setIcon(iconSearch);
+
     }
-    
+
     private void setImgBtnSearch() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoSearch.jpg"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnSearchClient.getWidth(), btnSearchClient.getHeight(), Image.SCALE_DEFAULT));
-            btnSearchClient.setIcon(iconSearch);
-            btnFilterClient.setIcon(iconSearch);
-            
-        } catch (IOException ex) {
-            Logger.getLogger(MenuClient.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoSearch.jpg"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnSearchClient.getWidth(), btnSearchClient.getHeight(), Image.SCALE_DEFAULT));
+        btnSearchClient.setIcon(iconSearch);
+        btnFilterClient.setIcon(iconSearch);
+
     }
-    
+
     private void setImgBtnUpdate() {
-        try {
-            Image imgSearch = ImageIO.read(getClass().getResource("/img/logoUpdate.jpg"));
-            Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnUpdateClient.getWidth(), btnUpdateClient.getHeight(), Image.SCALE_DEFAULT));
-            btnUpdateClient.setIcon(iconSearch);
-            
-        } catch (IOException ex) {
-            Logger.getLogger(MenuClient.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+
+        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoUpdate.jpg"));
+        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnUpdateClient.getWidth(), btnUpdateClient.getHeight(), Image.SCALE_DEFAULT));
+        btnUpdateClient.setIcon(iconSearch);
+
     }
 
     //______________________________________________________________________________________________________________
@@ -345,18 +327,18 @@ public class MenuClient extends javax.swing.JDialog {
         int rowSelected = tableClients.getSelectedRow();
         //Seleccionamos el DNI de la fila seleccionada
         String DNIClient = String.valueOf(tableClients.getValueAt(rowSelected, 3));
-        
+
         pestanas.setSelectedIndex(2);
         txtSearchClientModif.setText(DNIClient);
         this.fillFieldsModif();
     }
-    
+
     private void quickDelete() {
         //Ubicamos la fila en la cual realizamos el evento
         int rowSelected = tableClients.getSelectedRow();
         //Seleccionamos el DNI de la fila seleccionada
         String DNIClient = String.valueOf(tableClients.getValueAt(rowSelected, 3));
-        
+
         int response = JOptionPane.showConfirmDialog(this, "¿Desea eliminar el cliente?");
         if (response == 0) {
             DAOClient dao = new ClientDAOImpl();
@@ -377,28 +359,28 @@ public class MenuClient extends javax.swing.JDialog {
             evt.consume();
         }
     }
-    
+
     private void validarCamposNumericos(KeyEvent evt) {
         char c = evt.getKeyChar();
         if ((c < '0' || c > '9')) {
             evt.consume();
         }
     }
-    
+
     private void setearDateEntry() {
-        
+
         birthday.setDateFormatString("dd-MM-yyyy");
         birthdayModif.setDateFormatString("dd-MM-yyyy");
-        
+
         JTextFieldDateEditor editorBirthdayModif = (JTextFieldDateEditor) birthdayModif.getDateEditor();
         editorBirthdayModif.setEditable(false);
         editorBirthdayModif.setHorizontalAlignment(JTextField.CENTER);
-        
+
         JTextFieldDateEditor editorBirthday = (JTextFieldDateEditor) birthday.getDateEditor();
         editorBirthday.setEditable(false);
         editorBirthday.setHorizontalAlignment(JTextField.CENTER);
     }
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -533,7 +515,7 @@ public class MenuClient extends javax.swing.JDialog {
                     .addComponent(txtSearchClient)
                     .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblCountClient, javax.swing.GroupLayout.DEFAULT_SIZE, 19, Short.MAX_VALUE)
+                .addComponent(lblCountClient, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 396, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -708,7 +690,7 @@ public class MenuClient extends javax.swing.JDialog {
                     .addComponent(btnSaveClient, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
                     .addComponent(birthday, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(46, Short.MAX_VALUE))
+                .addContainerGap(92, Short.MAX_VALUE))
         );
 
         pestanas.addTab("Registrar", pestanaRegister);
@@ -880,7 +862,7 @@ public class MenuClient extends javax.swing.JDialog {
                                         .addComponent(txtPhoneModif, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
                                         .addComponent(birthdayModif, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnUpdateClient, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(btnUpdateClient, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pestanaUpdateLayout.createSequentialGroup()
                             .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGap(92, 92, 92)
@@ -899,36 +881,37 @@ public class MenuClient extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblDNINotFound, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtIdClientModif, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtNameModif, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtLastNameModif, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(pestanaUpdateLayout.createSequentialGroup()
-                        .addGap(5, 5, 5)
-                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtDNIModif, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtPhoneModif, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(pestanaUpdateLayout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-                        .addComponent(birthdayModif, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(btnUpdateClient, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(49, 49, 49))
+                        .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtIdClientModif, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtNameModif, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtLastNameModif, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pestanaUpdateLayout.createSequentialGroup()
+                                .addGap(5, 5, 5)
+                                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtDNIModif, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtPhoneModif, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(pestanaUpdateLayout.createSequentialGroup()
+                                .addGap(2, 2, 2)
+                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pestanaUpdateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                            .addComponent(birthdayModif, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(btnUpdateClient, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(95, 95, 95))
         );
 
         pestanas.addTab("Modificar", pestanaUpdate);
