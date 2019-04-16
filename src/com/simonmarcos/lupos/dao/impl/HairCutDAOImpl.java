@@ -4,6 +4,7 @@ import com.simonmarcos.lupos.dao.ConnectionDB;
 import com.simonmarcos.lupos.dao.DAOHairCut;
 import com.simonmarcos.lupos.model.Barber;
 import com.simonmarcos.lupos.model.Client;
+import com.simonmarcos.lupos.model.Expenses;
 import com.simonmarcos.lupos.model.HairCut;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -447,5 +448,7 @@ public class HairCutDAOImpl implements DAOHairCut {
         }
         return r;
     }
+
+    
 
 }

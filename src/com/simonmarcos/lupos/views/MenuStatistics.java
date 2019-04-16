@@ -2,6 +2,7 @@ package com.simonmarcos.lupos.views;
 
 import com.simonmarcos.lupos.dao.DAO;
 import com.simonmarcos.lupos.dao.DAOExpenses;
+import com.simonmarcos.lupos.dao.DAOTotalCuts;
 import com.simonmarcos.lupos.dao.impl.ExpensesDAOImpl;
 import com.simonmarcos.lupos.dao.impl.TotalCutsDAOImpl;
 import com.simonmarcos.lupos.model.Expenses;
@@ -103,6 +104,8 @@ public class MenuStatistics extends javax.swing.JDialog {
         dateSince.setDate(new Date());
         dateUntil.setDate(new Date());
         dateExpenses.setDate(new Date());
+        dateSinceEarningsTotal.setDate(new Date());
+        dateUntilEarningsTotal.setDate(new Date());
 
         dateSince.setDateFormatString("dd-MM-yyyy");
         JTextFieldDateEditor editorDateSince = (JTextFieldDateEditor) dateSince.getDateEditor();
@@ -113,6 +116,16 @@ public class MenuStatistics extends javax.swing.JDialog {
         JTextFieldDateEditor editorDateUntil = (JTextFieldDateEditor) dateUntil.getDateEditor();
         editorDateUntil.setEditable(false);
         editorDateUntil.setHorizontalAlignment(JTextField.CENTER);
+
+        dateSinceEarningsTotal.setDateFormatString("dd-MM-yyyy");
+        JTextFieldDateEditor editorDateSinceEarningsTotal = (JTextFieldDateEditor) dateSinceEarningsTotal.getDateEditor();
+        editorDateSinceEarningsTotal.setEditable(false);
+        editorDateSinceEarningsTotal.setHorizontalAlignment(JTextField.CENTER);
+
+        dateUntilEarningsTotal.setDateFormatString("dd-MM-yyyy");
+        JTextFieldDateEditor editorDateUntilEarningsTotal = (JTextFieldDateEditor) dateUntilEarningsTotal.getDateEditor();
+        editorDateUntilEarningsTotal.setEditable(false);
+        editorDateUntilEarningsTotal.setHorizontalAlignment(JTextField.CENTER);
 
         dateExpenses.setDateFormatString("dd-MM-yyyy");
         JTextFieldDateEditor editorDateExpenses = (JTextFieldDateEditor) dateExpenses.getDateEditor();
@@ -429,6 +442,22 @@ public class MenuStatistics extends javax.swing.JDialog {
         listExpenses = new ExpensesDAOImpl().toList();
     }
 
+    private void getValueTotalExpensesANDTotalCuts() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String dateSinceString = sdf.format(dateSinceEarningsTotal.getDate());
+        String dateUntilString = sdf.format(dateUntilEarningsTotal.getDate());
+
+        DAOExpenses daoExpenses = new ExpensesDAOImpl();
+        double valueExpenses = daoExpenses.getPriceTotalExpenses(dateSinceString, dateUntilString);
+
+        DAOTotalCuts daoTotalCuts = new TotalCutsDAOImpl();
+        double valueTotalCuts = daoTotalCuts.getPriceTotalHairCut(dateSinceString, dateUntilString);
+
+        lblEarningsTotalGeneral.setText("$ " + valueTotalCuts);
+        lblExpesesTotal.setText("$ " + valueExpenses);
+        lblEarningDefinitivas.setText("$ " + (valueTotalCuts - valueExpenses));
+    }
+
     //Metodo que me buscara el barbero dependiendo la fecha de corte
     private void getListForDateSinceAndUntil() {
 
@@ -627,6 +656,16 @@ public class MenuStatistics extends javax.swing.JDialog {
         lblEarningsTotal = new javax.swing.JLabel();
         rbEarningsTotal = new javax.swing.JRadioButton();
         jPanel6 = new javax.swing.JPanel();
+        dateSinceEarningsTotal = new com.toedter.calendar.JDateChooser();
+        dateUntilEarningsTotal = new com.toedter.calendar.JDateChooser();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        lblEarningsTotalGeneral = new javax.swing.JLabel();
+        lblExpesesTotal = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
+        btnCalculateValueTotal = new javax.swing.JButton();
+        lblEarningDefinitivas = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -979,7 +1018,7 @@ public class MenuStatistics extends javax.swing.JDialog {
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGap(115, 115, 115)
                         .addComponent(rbSearchReport)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 123, Short.MAX_VALUE)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                         .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1001,7 +1040,7 @@ public class MenuStatistics extends javax.swing.JDialog {
                 .addComponent(jListYear, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(16, Short.MAX_VALUE)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(lblReport, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1069,16 +1108,16 @@ public class MenuStatistics extends javax.swing.JDialog {
         });
 
         groupSearchAvanced.add(rbEarningsLupos);
-        rbEarningsLupos.setText("CONFIRMAR GANANCIAS LUPO");
+        rbEarningsLupos.setText("GRAFICO GANANCIAS LUPO");
 
         groupSearchAvanced.add(rbCutsAdult);
-        rbCutsAdult.setText("CONFIRMAR CORTES");
+        rbCutsAdult.setText("GRAFICO CORTES");
 
         groupSearchAvanced.add(rbCutsBeard);
-        rbCutsBeard.setText("CONFIRMAR BARBAS");
+        rbCutsBeard.setText("GRAFICO BARBAS");
 
         groupSearchAvanced.add(rbCutsDrawing);
-        rbCutsDrawing.setText("CONFIRMAR DIBUJOS");
+        rbCutsDrawing.setText("GRAFICO DIBUJOS");
 
         jLabel9.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
         jLabel9.setText("Ganancias Total:");
@@ -1090,7 +1129,7 @@ public class MenuStatistics extends javax.swing.JDialog {
         lblEarningsTotal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
 
         groupSearchAvanced.add(rbEarningsTotal);
-        rbEarningsTotal.setText("CONFIRMAR GANANCIAS TOTAL");
+        rbEarningsTotal.setText("GRAFICO GANANCIAS TOTAL");
 
         javax.swing.GroupLayout panelStatisticsLayout = new javax.swing.GroupLayout(panelStatistics);
         panelStatistics.setLayout(panelStatisticsLayout);
@@ -1115,10 +1154,10 @@ public class MenuStatistics extends javax.swing.JDialog {
                                 .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(73, 73, 73)
                         .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(rbEarningsTotal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(rbCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(rbEarningsLupos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(rbCutsAdult, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addContainerGap(159, Short.MAX_VALUE))
+                            .addComponent(rbEarningsTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE))
+                        .addContainerGap(118, Short.MAX_VALUE))
                     .addGroup(panelStatisticsLayout.createSequentialGroup()
                         .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelStatisticsLayout.createSequentialGroup()
@@ -1202,15 +1241,113 @@ public class MenuStatistics extends javax.swing.JDialog {
 
         pestanas.addTab("Estadísticas Cortes", jPanel3);
 
+        dateSinceEarningsTotal.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        dateSinceEarningsTotal.setDateFormatString("yyyy/MM/dd");
+        dateSinceEarningsTotal.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+
+        dateUntilEarningsTotal.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        dateUntilEarningsTotal.setDateFormatString("yyyy/MM/dd");
+        dateUntilEarningsTotal.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+
+        jLabel11.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
+        jLabel11.setText("Ganancias Lupos:");
+
+        jLabel13.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
+        jLabel13.setText("Gastos Total:");
+
+        lblEarningsTotalGeneral.setBackground(new java.awt.Color(255, 255, 255));
+        lblEarningsTotalGeneral.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblEarningsTotalGeneral.setForeground(new java.awt.Color(255, 0, 0));
+        lblEarningsTotalGeneral.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblEarningsTotalGeneral.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+
+        lblExpesesTotal.setBackground(new java.awt.Color(255, 255, 255));
+        lblExpesesTotal.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblExpesesTotal.setForeground(new java.awt.Color(255, 0, 0));
+        lblExpesesTotal.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblExpesesTotal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+
+        jLabel14.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
+        jLabel14.setText("Ganancias definitivas:");
+
+        jButton2.setText("IMPRIMIR REPORTE");
+
+        btnCalculateValueTotal.setBackground(new java.awt.Color(0, 153, 204));
+        btnCalculateValueTotal.setFont(new java.awt.Font("Arial Unicode MS", 3, 22)); // NOI18N
+        btnCalculateValueTotal.setForeground(new java.awt.Color(255, 255, 255));
+        btnCalculateValueTotal.setText("BUSCAR");
+        btnCalculateValueTotal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        btnCalculateValueTotal.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnCalculateValueTotal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCalculateValueTotalActionPerformed(evt);
+            }
+        });
+
+        lblEarningDefinitivas.setBackground(new java.awt.Color(0, 0, 0));
+        lblEarningDefinitivas.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblEarningDefinitivas.setForeground(new java.awt.Color(255, 0, 0));
+        lblEarningDefinitivas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblEarningDefinitivas.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 935, Short.MAX_VALUE)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap(223, Short.MAX_VALUE)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(329, 329, 329))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(jPanel6Layout.createSequentialGroup()
+                                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(dateSinceEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(dateUntilEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnCalculateValueTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel6Layout.createSequentialGroup()
+                                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(lblEarningsTotalGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel6Layout.createSequentialGroup()
+                                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(lblExpesesTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel6Layout.createSequentialGroup()
+                                    .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(lblEarningDefinitivas, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(206, 206, 206))))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 534, Short.MAX_VALUE)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(49, 49, 49)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnCalculateValueTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(dateSinceEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(dateUntilEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(47, 47, 47)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblEarningsTotalGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblExpesesTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(47, 47, 47)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblEarningDefinitivas, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(117, Short.MAX_VALUE))
         );
 
         pestanas.addTab("Estadísticas General", jPanel6);
@@ -1294,23 +1431,34 @@ public class MenuStatistics extends javax.swing.JDialog {
         txtSearchExpenses.setText("");
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void btnCalculateValueTotalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCalculateValueTotalActionPerformed
+        this.getValueTotalExpensesANDTotalCuts();
+    }//GEN-LAST:event_btnCalculateValueTotalActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCalculateValueTotal;
     private javax.swing.JButton btnOpenGraphics;
     private javax.swing.JButton btnSaveExpenses;
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSearchExpenses;
     private com.toedter.calendar.JDateChooser dateExpenses;
     private com.toedter.calendar.JDateChooser dateSince;
+    private com.toedter.calendar.JDateChooser dateSinceEarningsTotal;
     private com.toedter.calendar.JDateChooser dateSinceExpenses;
     private com.toedter.calendar.JDateChooser dateUntil;
+    private com.toedter.calendar.JDateChooser dateUntilEarningsTotal;
     private com.toedter.calendar.JDateChooser dateUntilExpenses;
     private javax.swing.ButtonGroup groupSearchAvanced;
     private javax.swing.ButtonGroup groupTypeSearch;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1333,8 +1481,11 @@ public class MenuStatistics extends javax.swing.JDialog {
     private javax.swing.JLabel lblCutsAdult;
     private javax.swing.JLabel lblCutsBeard;
     private javax.swing.JLabel lblCutsDrawing;
+    private javax.swing.JLabel lblEarningDefinitivas;
     private javax.swing.JLabel lblEarningsLupos;
     private javax.swing.JLabel lblEarningsTotal;
+    private javax.swing.JLabel lblEarningsTotalGeneral;
+    private javax.swing.JLabel lblExpesesTotal;
     private javax.swing.JLabel lblReport;
     private javax.swing.JLabel lblStatictisDriagram;
     private javax.swing.JComboBox<String> listCategory;

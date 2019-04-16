@@ -2,10 +2,7 @@ package com.simonmarcos.lupos.dao.impl;
 
 import com.simonmarcos.lupos.dao.ConnectionDB;
 import com.simonmarcos.lupos.dao.DAOExpenses;
-import com.simonmarcos.lupos.model.Barber;
-import com.simonmarcos.lupos.model.Client;
 import com.simonmarcos.lupos.model.Expenses;
-import com.simonmarcos.lupos.model.HairCut;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -248,5 +245,39 @@ public class ExpensesDAOImpl implements DAOExpenses {
             }
         }
         return list;
+    }
+
+    @Override
+    public double getPriceTotalExpenses(String since, String until) {
+        double valueTotal = 0;
+        if (c != null) {
+            try {
+                String consultaSQL = "SELECT SUM(`expenses`.`value`) AS valueTotal FROM `expenses` WHERE `expenses`.`date` BETWEEN ? AND ?";
+                PreparedStatement ps = c.prepareStatement(consultaSQL);
+                ps.setString(1, since);
+                ps.setString(2, until);
+
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    valueTotal = rs.getDouble("valueTotal");
+                }
+
+                ps.close();
+                rs.close();
+
+                return valueTotal;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(Expenses.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    c.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Expenses.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return valueTotal;
     }
 }

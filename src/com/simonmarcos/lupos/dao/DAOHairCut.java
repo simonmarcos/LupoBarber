@@ -14,4 +14,5 @@ public interface DAOHairCut extends DAO<HairCut> {
     public int savePrizeBarber(HairCut o);
 
     public int deleteByDate(String date);
+
 }

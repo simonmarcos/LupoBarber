@@ -3,6 +3,7 @@ package com.simonmarcos.lupos.dao.impl;
 import com.simonmarcos.lupos.dao.ConnectionDB;
 import com.simonmarcos.lupos.dao.DAOTotalCuts;
 import com.simonmarcos.lupos.model.Cuts;
+import com.simonmarcos.lupos.model.HairCut;
 import com.simonmarcos.lupos.model.TotalCuts;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -243,4 +244,37 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
         return listTotalCuts;
     }
 
+    @Override
+    public double getPriceTotalHairCut(String since, String until) {
+        double valueTotal = 0;
+        if (c != null) {
+            try {
+                String consultaSQL = "SELECT SUM(`totalcuts`.`earningsLupos`) AS valueTotal FROM `totalcuts` WHERE `totalcuts`.`date` BETWEEN ? AND ?";
+                PreparedStatement ps = c.prepareStatement(consultaSQL);
+                ps.setString(1, since);
+                ps.setString(2, until);
+
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    valueTotal = rs.getDouble("valueTotal");
+                }
+
+                ps.close();
+                rs.close();
+
+                return valueTotal;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    c.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(HairCut.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return valueTotal;
+    }
 }

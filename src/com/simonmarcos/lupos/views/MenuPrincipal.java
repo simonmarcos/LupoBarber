@@ -33,12 +33,12 @@ import javax.swing.table.JTableHeader;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class MenuPrincipal extends javax.swing.JFrame {
-    
+
     private DefaultTableModel dtm;
     private List<Barber> listAllBarber;
     private double prizeCuts = 0;
     private Map<Integer, String> mapIdBarbers = null;
-    
+
     public MenuPrincipal() {
         initComponents();
         //this.setResizable(false);
@@ -58,45 +58,45 @@ public class MenuPrincipal extends javax.swing.JFrame {
         this.getDateToday();
         this.setearTittles();
         this.calculateBirthDay();
-        
+
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
-                
+
             }
-            
+
             @Override
             public void windowClosing(WindowEvent e) {
                 saveAllCutsOfDay();
             }
-            
+
             @Override
             public void windowClosed(WindowEvent e) {
-                
+
             }
-            
+
             @Override
             public void windowIconified(WindowEvent e) {
-                
+
             }
-            
+
             @Override
             public void windowDeiconified(WindowEvent e) {
-                
+
             }
-            
+
             @Override
             public void windowActivated(WindowEvent e) {
-                
+
             }
-            
+
             @Override
             public void windowDeactivated(WindowEvent e) {
-                
+
             }
         });
     }
-    
+
     private void dimensionWindows() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = (int) screenSize.getWidth();
@@ -104,22 +104,22 @@ public class MenuPrincipal extends javax.swing.JFrame {
         this.setSize(width, height);
         this.setLocation((width - this.getWidth()) / 2, (height - this.getHeight()) / 2);
     }
-    
+
     private String getDateToday() {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         return formatter.format(ts);
     }
-    
+
     private void clearAllFields() {
         checkCutAdult.setSelected(false);
         checkCutBeard.setSelected(false);
         checkCutDrawing.setSelected(false);
-        
+
         combolistAllClient.setSelectedIndex(0);
         combolistAllBarber.setSelectedIndex(0);
     }
-    
+
     private void setearTittles() {
         lblClientSection.setToolTipText("Aquí podremos ver todos los clientes para luego seleccionar el buscado");
         lblBarberSection.setToolTipText("Aquí podremos ver todos los barberos para luego seleccionar el buscado");
@@ -133,7 +133,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnBarber.setToolTipText("Menu con todas las acciones para los barberos");
         btnCuts.setToolTipText("Menu con todas las acciones para las estadísticas del negocio");
     }
-    
+
     private void calculateBirthDay() {
         listAllBarber.forEach(b -> {
             java.sql.Date nowDate = new java.sql.Date(new java.util.Date().getTime());
@@ -179,7 +179,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     //METODOS PARA GUARDAR EL CORTE EN LA BASE DE DATOS
     private void saveCuts() {
         DAOHairCut dao = new HairCutDAOImpl();
-        
+
         String idClient = "";
         String nameClient = "";
         String idBarber = "";
@@ -194,7 +194,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 nameClient += getIdClientForListClient()[i];
             } else if (i == 1) {
                 idClient += getIdClientForListClient()[i];
-                
+
             }
         }
         Client c = new Client();
@@ -208,7 +208,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 idBarber += getIdBarberForListBarber()[i];
             }
         }
-        
+
         Barber b = new Barber();
         b.setIdBarber(Integer.parseInt(idBarber));
 
@@ -227,7 +227,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                     break;
             }
         }
-        
+
         HairCut h = new HairCut();
         h.setClient(c);
         h.setBarber(b);
@@ -246,16 +246,16 @@ public class MenuPrincipal extends javax.swing.JFrame {
     //Metodo que me devolvera el precio total del corte segun los checks seleccionados.
     //Tambien extra, me devolvera los cortes que se realizo
     private String[] getPriceDependingCuts() {
-        
+
         DAOCuts dao = new CutsDAOImpl();
         List<Cuts> listCuts = dao.toList();
-        
+
         String cutsFinal = "";
-        
+
         boolean cutAdultSelected = checkCutAdult.isSelected();
         boolean cutBeardSelected = checkCutBeard.isSelected();
         boolean cutDrawingSelected = checkCutDrawing.isSelected();
-        
+
         double totalPrice = 0;
         double totalPriceBarber = 0;
         //Si solo esta seleccionado el check de CutsAdult
@@ -294,7 +294,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 }
             }
             cutsFinal += checkCutAdult.getText() + " / " + checkCutBeard.getText() + " / " + checkCutDrawing.getText();
-            
+
         }//Si solo esta seleccionado el  checkDrawing
         else if (!cutAdultSelected && !cutBeardSelected && cutDrawingSelected) {
             for (Cuts c : listCuts) {
@@ -361,7 +361,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         //Codigo para no poder escribir las celdas
         tableBarberCuts.setDefaultEditor(Object.class, null);
     }
-    
+
     private void fillTableBarberCuts() {
         String[] fila = new String[5];
         listAllBarber = this.getAllBarber();
@@ -377,18 +377,18 @@ public class MenuPrincipal extends javax.swing.JFrame {
         });
         tableBarberCuts.setModel(dtm);
     }
-    
+
     private List<Barber> getAllBarber() {
         DAOBarber dao = new BarberDAOImpl();
         return dao.toListByNameAndLastName();
     }
-    
+
     private void fillTableBarberHairCutsToday() {
-        
+
         int row = tableBarberCuts.getRowCount();
         DAOHairCut dao = new HairCutDAOImpl();
         List<HairCut> listHairCut = dao.queryFilterForDate(this.getDateToday());
-        
+
         double earningsBoss = 0;
 
         //Recorremos los datos consultados de la base de datos
@@ -402,7 +402,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 String cutsBeard = tableBarberCuts.getValueAt(i, 2).toString();
                 String cutsDrawing = tableBarberCuts.getValueAt(i, 3).toString();
                 String priceCuts = tableBarberCuts.getValueAt(i, 4).toString();
-                
+
                 int countCutsAdult = 0;
                 int countCutsBeard;
                 int countCutsDrawing;
@@ -445,7 +445,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             double totalEarningsBarber = Double.valueOf(tableBarberCuts.getValueAt(i, 4).toString());
             int countPrize = (countCutsAdult / 10) * 10;
             totalEarningsBarber += countPrize;
-            
+
             tableBarberCuts.setValueAt(String.valueOf(totalEarningsBarber), i, 4);
         }
     }
@@ -470,13 +470,13 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 }
                 double totalEarningsBarber = Double.valueOf(tableBarberCuts.getValueAt(i, 4).toString());
                 int countPrize = (countCutsAdult / 10) * 10;
-                
+
                 HairCut hc = new HairCut();
-                
+
                 Barber b = new Barber();
                 b.setIdBarber(idBarber);
                 hc.setBarber(b);
-                
+
                 hc.setDate(new java.sql.Timestamp(System.currentTimeMillis()));
                 hc.setPriceBarber(countPrize);
                 //Lo guardamos en la base de datoss
@@ -484,31 +484,31 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 daoSave.savePrizeBarber(hc);
             }
         }
-        
+
     }
-    
+
     private void updateTableHairCutsBarber() {
         this.setearTableBarberCuts();
         this.fillTableBarberCuts();
         this.fillTableBarberHairCutsToday();
     }
-    
+
     private void getAllCutsAndEarningTheDay(double earnings) {
-        
+
         int row = tableBarberCuts.getRowCount();
-        
+
         int countHairCutsAdult = 0;
         int countHairCutsBeader = 0;
         int countHairCutsDrawing = 0;
         double countEarnings = 0;
-        
+
         for (int i = 0; i < row; i++) {
             countHairCutsAdult += Integer.parseInt(tableBarberCuts.getValueAt(i, 1).toString());
             countHairCutsBeader += Integer.parseInt(tableBarberCuts.getValueAt(i, 2).toString());
             countHairCutsDrawing += Integer.parseInt(tableBarberCuts.getValueAt(i, 3).toString());
             countEarnings += Double.parseDouble(tableBarberCuts.getValueAt(i, 4).toString());
         }
-        
+
         lblCutsAdult.setText("Cortes Adultos: " + countHairCutsAdult);
         lblCutsBeard.setText("Barba: " + countHairCutsBeader);
         lblCutsDraw.setText("Dibujos: " + countHairCutsDrawing);
@@ -532,7 +532,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 combolistAllClient.addItem(c.getLastName() + " " + c.getName() + " - " + c.getIdClient());
             }
         });
-        
+
         combolistAllClient.setSelectedItem("");
         AutoCompleteDecorator.decorate(combolistAllClient);
     }
@@ -544,7 +544,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         listAllBarber.stream().sorted().forEach(c -> {
             combolistAllBarber.addItem(c.getLastName() + " " + c.getName() + " - " + c.getIdBarber());
         });
-        
+
         combolistAllBarber.setSelectedItem("");
         //Metodo para poder escribir y buscar en el JComboBox
         AutoCompleteDecorator.decorate(combolistAllBarber);
@@ -567,35 +567,35 @@ public class MenuPrincipal extends javax.swing.JFrame {
     //______________________________________________________________________________________________________________
     //METODOS PARA COLOCAR IMAGENES A LOS BOTONES
     private void setImgBtnClient() {
-        
+
         Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoClient.png"));
         Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnClient.getWidth(), btnClient.getHeight(), Image.SCALE_DEFAULT));
         btnClient.setIcon(iconSearch);
-        
+
     }
-    
+
     private void setImgBtnBarber() {
-        
+
         Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoBarber.png"));
         Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnBarber.getWidth(), btnBarber.getHeight(), Image.SCALE_DEFAULT));
         btnBarber.setIcon(iconSearch);
-        
+
     }
-    
+
     private void setImgPanelLogoLupos() {
-        
+
         Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoLupos.jpg"));
         Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(logoLuposBarber.getWidth(), logoLuposBarber.getHeight(), Image.SCALE_DEFAULT));
         logoLuposBarber.setIcon(iconSearch);
-        
+
     }
-    
+
     private void setImgBtnStadistics() {
-        
+
         Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/statistics.png"));
         Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(btnCuts.getWidth(), btnCuts.getHeight(), Image.SCALE_DEFAULT));
         btnCuts.setIcon(iconSearch);
-        
+
     }
 
     //______________________________________________________________________________________________________________
@@ -1245,7 +1245,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
         combolistAllClient.setEditable(true);
         combolistAllClient.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         combolistAllClient.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        combolistAllClient.setEnabled(false);
 
         lblClientSection.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         lblClientSection.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -1265,7 +1264,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
         combolistAllBarber.setEditable(true);
         combolistAllBarber.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         combolistAllBarber.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        combolistAllBarber.setEnabled(false);
         combolistAllBarber.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 combolistAllBarberActionPerformed(evt);
@@ -1278,7 +1276,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnConfirm.setText("CONFIRMAR");
         btnConfirm.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         btnConfirm.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnConfirm.setEnabled(false);
         btnConfirm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnConfirmActionPerformed(evt);
@@ -1303,7 +1300,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnSaveTotalCuts.setText("GUARDAR");
         btnSaveTotalCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         btnSaveTotalCuts.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnSaveTotalCuts.setEnabled(false);
         btnSaveTotalCuts.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveTotalCutsActionPerformed(evt);
@@ -1343,7 +1339,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnUpdate.setText("ACTUALIZAR");
         btnUpdate.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         btnUpdate.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnUpdate.setEnabled(false);
         btnUpdate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateActionPerformed(evt);
@@ -1502,7 +1497,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_jFrame1formKeyPressed
 
     private void btnCambiarTema3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCambiarTema3ActionPerformed
-        
+
 
     }//GEN-LAST:event_btnCambiarTema3ActionPerformed
 
@@ -1535,23 +1530,26 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_jFrame2formKeyPressed
 
     private void btnBarberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBarberActionPerformed
-        while (true) {
-            String pass = JOptionPane.showInputDialog(this, "Ingrese la contraseña para ingresar");
-            if (pass != null) {
-                if (pass.equals("lupos")) {
-                    MenuBarber mb = new MenuBarber(this, false);
-                    mb.setVisible(true);
-                    break;
-                } else {
-                    JOptionPane.showMessageDialog(this, "Contraseña incorrecta, intente nuevamente.");
-                }
-            } else {
-                break;
-            }
-        }
+        MenuBarber mb = new MenuBarber(this, false);
+        mb.setVisible(true);
+//        while (true) {
+//            String pass = JOptionPane.showInputDialog(this, "Ingrese la contraseña para ingresar");
+//            if (pass != null) {
+//                if (pass.equals("lupos")) {
+//                    MenuBarber mb = new MenuBarber(this, false);
+//                    mb.setVisible(true);
+//                    break;
+//                } else {
+//                    JOptionPane.showMessageDialog(this, "Contraseña incorrecta, intente nuevamente.");
+//                }
+//            } else {
+//                break;
+//            }
+//        }
     }//GEN-LAST:event_btnBarberActionPerformed
 
     private void btnCutsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCutsActionPerformed
+
         while (true) {
             String pass = JOptionPane.showInputDialog(this, "Ingrese la contraseña para ingresar");
             if (pass != null) {
@@ -1569,20 +1567,22 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCutsActionPerformed
 
     private void btnClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClientActionPerformed
-        while (true) {
-            String pass = JOptionPane.showInputDialog(this, "Ingrese la contraseña para ingresar");
-            if (pass != null) {
-                if (pass.equals("lupos")) {
-                    MenuClient mc = new MenuClient(null, true);
-                    mc.setVisible(true);
-                    break;
-                } else {
-                    JOptionPane.showMessageDialog(this, "Contraseña incorrecta, intente nuevamente.");
-                }
-            } else {
-                break;
-            }
-        }
+        MenuClient mc = new MenuClient(null, true);
+        mc.setVisible(true);
+//        while (true) {
+//            String pass = JOptionPane.showInputDialog(this, "Ingrese la contraseña para ingresar");
+//            if (pass != null) {
+//                if (pass.equals("lupos")) {
+//                    MenuClient mc = new MenuClient(null, true);
+//                    mc.setVisible(true);
+//                    break;
+//                } else {
+//                    JOptionPane.showMessageDialog(this, "Contraseña incorrecta, intente nuevamente.");
+//                }
+//            } else {
+//                break;
+//            }
+//        }
     }//GEN-LAST:event_btnClientActionPerformed
 
     private void combolistAllBarberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combolistAllBarberActionPerformed
@@ -1590,7 +1590,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_combolistAllBarberActionPerformed
 
     private void btnConfirmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmActionPerformed
-        
+
         if (!combolistAllClient.getSelectedItem().toString().isEmpty() && !combolistAllBarber.getSelectedItem().toString().isEmpty()) {
             boolean cutAdultSelected = checkCutAdult.isSelected();
             boolean cutBeardSelected = checkCutBeard.isSelected();

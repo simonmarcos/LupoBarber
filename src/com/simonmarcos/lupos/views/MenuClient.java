@@ -7,6 +7,7 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Icon;
@@ -371,6 +372,9 @@ public class MenuClient extends javax.swing.JDialog {
 
         birthday.setDateFormatString("dd-MM-yyyy");
         birthdayModif.setDateFormatString("dd-MM-yyyy");
+
+        birthday.setDate(new java.sql.Date(new java.util.Date().getTime()));
+        birthdayModif.setDate(new java.sql.Date(new java.util.Date().getTime()));
 
         JTextFieldDateEditor editorBirthdayModif = (JTextFieldDateEditor) birthdayModif.getDateEditor();
         editorBirthdayModif.setEditable(false);
@@ -1015,10 +1019,6 @@ public class MenuClient extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_txtPhoneKeyPressed
 
-    private void btnSearchClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchClientActionPerformed
-        this.fillFieldsModif();
-    }//GEN-LAST:event_btnSearchClientActionPerformed
-
     private void txtSearchClientKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchClientKeyTyped
         filterTableClient(txtSearchClient.getText());
     }//GEN-LAST:event_txtSearchClientKeyTyped
@@ -1072,6 +1072,10 @@ public class MenuClient extends javax.swing.JDialog {
     private void txtNameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNameKeyReleased
 
     }//GEN-LAST:event_txtNameKeyReleased
+
+    private void btnSearchClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchClientActionPerformed
+        this.fillFieldsModif();
+    }//GEN-LAST:event_btnSearchClientActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
