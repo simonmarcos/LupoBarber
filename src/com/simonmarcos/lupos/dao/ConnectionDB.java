@@ -49,7 +49,7 @@ public class ConnectionDB {
         }
     }
 
-    public static boolean isIsConected() {
+    public static boolean isConected() {
         return isConected;
     }
 }
