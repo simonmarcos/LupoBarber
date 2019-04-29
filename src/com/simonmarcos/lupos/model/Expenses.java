@@ -11,8 +11,7 @@ public class Expenses {
     private String description;
     private double value;
 
-    public Expenses(int idExpenses, String category, String type, Date date, String description, double value) {
-        this.idExpenses = idExpenses;
+    public Expenses( String category, String type, Date date, String description, double value) {
         this.category = category;
         this.type = type;
         this.date = date;

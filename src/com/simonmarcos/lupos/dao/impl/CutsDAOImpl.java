@@ -13,16 +13,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CutsDAOImpl implements DAOCuts {
-    
+
     private ConnectionDB myConnection;
     private Connection c;
-    
+
     public CutsDAOImpl() {
         myConnection = ConnectionDB.instanciar();
         c = myConnection.connect();
         System.out.println("Cuts DAO");
     }
-    
+
     @Override
     public int save(Cuts o) {
         List<Cuts> lista = toList();
@@ -30,23 +30,23 @@ public class CutsDAOImpl implements DAOCuts {
         if (!lista.contains(o)) {
             c = myConnection.connect();
             if (c != null) {
-                
+
                 String consultaSQL = "INSERT INTO Cuts (idCuts,type,price,priceBarber,prize) VALUES (?,?,?,?,?)";
                 PreparedStatement ps = null;
-                
+
                 try {
-                    
+
                     ps = c.prepareStatement(consultaSQL);
                     ps.setInt(1, o.getIdCuts());
                     ps.setString(2, o.getType());
                     ps.setDouble(3, o.getPrice());
                     ps.setDouble(4, o.getPriceBarber());
                     ps.setDouble(5, o.getPrize());
-                    
+
                     r = ps.executeUpdate();
                     ps.close();
                     return r;
-                    
+
                 } catch (SQLException ex) {
                     Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
@@ -58,21 +58,21 @@ public class CutsDAOImpl implements DAOCuts {
                 }
             }
         }
-        
+
         return r;
     }
-    
+
     @Override
     public List<Cuts> queryFilter(int code, String name) {
         List<Cuts> list = null;
         if (c != null) {
             try {
                 String consultaSQL = "SELECT idCuts,type,price,priceBarber,prize FROM Cuts WHERE idCuts = ?";
-                
+
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ps.setInt(1, code);
                 ResultSet rs = ps.executeQuery();
-                
+
                 list = new ArrayList<>();
                 while (rs.next()) {
                     Cuts c = new Cuts();
@@ -83,12 +83,12 @@ public class CutsDAOImpl implements DAOCuts {
                     c.setPrize(rs.getDouble("prize"));
                     list.add(c);
                 }
-                
+
                 ps.close();
                 rs.close();
-                
+
                 return list;
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
@@ -101,7 +101,7 @@ public class CutsDAOImpl implements DAOCuts {
         }
         return list;
     }
-    
+
     @Override
     public int modificar(int code, Cuts o) {
         int r = 0;
@@ -114,18 +114,18 @@ public class CutsDAOImpl implements DAOCuts {
                 ps.setDouble(3, o.getPriceBarber());
                 ps.setDouble(4, o.getPrize());
                 ps.setInt(5, code);
-                
+
                 r = ps.executeUpdate();
-                
+
                 ps.close();
                 return r;
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
                     c.close();
-                    
+
                 } catch (SQLException ex) {
                     Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -133,17 +133,17 @@ public class CutsDAOImpl implements DAOCuts {
         }
         return r;
     }
-    
+
     @Override
     public List<Cuts> toList() {
         List<Cuts> list = null;
         if (c != null) {
             try {
                 String consultaSQL = "SELECT idCuts,type,price,priceBarber,prize FROM Cuts";
-                
+
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ResultSet rs = ps.executeQuery();
-                
+
                 list = new ArrayList<>();
                 while (rs.next()) {
                     Cuts c = new Cuts();
@@ -154,12 +154,12 @@ public class CutsDAOImpl implements DAOCuts {
                     c.setPrize(rs.getDouble("prize"));
                     list.add(c);
                 }
-                
+
                 ps.close();
                 rs.close();
-                
+
                 return list;
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
@@ -172,7 +172,7 @@ public class CutsDAOImpl implements DAOCuts {
         }
         return list;
     }
-    
+
     @Override
     public int delete(int code) {
         int r = 0;
@@ -180,17 +180,17 @@ public class CutsDAOImpl implements DAOCuts {
             try {
                 PreparedStatement ps = c.prepareStatement("DELETE FROM Cuts WHERE idCuts=?");
                 ps.setInt(1, code);
-                
+
                 r = ps.executeUpdate();
                 ps.close();
                 return r;
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
                     c.close();
-                    
+
                 } catch (SQLException ex) {
                     Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -198,7 +198,7 @@ public class CutsDAOImpl implements DAOCuts {
         }
         return r;
     }
-    
+
     @Override
     public double getPriceBarber(String name) {
         double priceBarber = 0;
@@ -206,20 +206,20 @@ public class CutsDAOImpl implements DAOCuts {
             try {
                 PreparedStatement ps = c.prepareStatement("SELECT priceBarber FROM Cuts WHERE cuts.`type`= ?");
                 ps.setString(1, name);
-                
+
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     priceBarber += rs.getDouble("priceBarber");
                 }
                 ps.close();
                 return priceBarber;
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
                     c.close();
-                    
+
                 } catch (SQLException ex) {
                     Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -227,31 +227,56 @@ public class CutsDAOImpl implements DAOCuts {
         }
         return priceBarber;
     }
-    
+
+    //METODO QUE ME DEVUELVE EL PRECIO DEL BARBERO Y EL PRECIO DEL PREMIO
     @Override
-    public double getPrize() {
-        double priceBarber = 0;
+    public double[] getPrizeANDPrice(String cuts) {
+        double[] price = null;
+        String consultaSQL = "";
+        PreparedStatement ps = null;
         if (c != null) {
             try {
-                PreparedStatement ps = c.prepareStatement("SELECT prize FROM Cuts WHERE type='Corte'");
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    priceBarber += rs.getDouble("prize");
+                if (cuts.equalsIgnoreCase("BARBA")) {
+                    consultaSQL += "SELECT priceBarber FROM Cuts WHERE type='Barba'";
+
+                    ps = c.prepareStatement(consultaSQL);
+                    ResultSet rs = ps.executeQuery();
+                    price = new double[1];
+                    while (rs.next()) {
+                        price[0] += rs.getDouble("priceBarber");
+                    }
+                } else if (cuts.equalsIgnoreCase("CORTE")) {
+                    consultaSQL += "SELECT price,priceBarber FROM Cuts WHERE type='Corte'";
+                    ps = c.prepareStatement(consultaSQL);
+                    ResultSet rs = ps.executeQuery();
+                    price = new double[2];
+                    while (rs.next()) {
+                        price[0] += rs.getDouble("price");
+                        price[1] += rs.getDouble("priceBarber");
+                    }
+                } else {
+                    consultaSQL += "SELECT prize FROM Cuts WHERE type='Corte'";
+                    ps = c.prepareStatement(consultaSQL);
+                    ResultSet rs = ps.executeQuery();
+                    price = new double[1];
+                    while (rs.next()) {
+                        price[0] += rs.getDouble("prize");
+                    }
                 }
                 ps.close();
-                return priceBarber;
-                
+                return price;
+
             } catch (SQLException ex) {
                 Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
                     c.close();
-                    
+
                 } catch (SQLException ex) {
                     Logger.getLogger(Cuts.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
-        return priceBarber;
+        return price;
     }
 }

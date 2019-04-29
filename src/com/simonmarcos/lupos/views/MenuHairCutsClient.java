@@ -227,7 +227,7 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -242,7 +242,7 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -261,7 +261,7 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
     }//GEN-LAST:event_txtSearchClientKeyTyped
 
     private void tableHairCutsClientKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tableHairCutsClientKeyPressed
-        if (evt.getKeyChar() == 'd' && evt.isAltDown()) {
+        if (evt.getKeyChar() == 'd' || evt.getKeyChar() == 'D' && evt.isAltDown()) {
             deleteHairCut();
         }
     }//GEN-LAST:event_tableHairCutsClientKeyPressed

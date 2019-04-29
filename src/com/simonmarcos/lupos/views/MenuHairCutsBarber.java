@@ -6,9 +6,12 @@ import com.simonmarcos.lupos.dao.impl.HairCutDAOImpl;
 import com.simonmarcos.lupos.model.Barber;
 import com.simonmarcos.lupos.model.Client;
 import com.simonmarcos.lupos.model.HairCut;
+import com.toedter.calendar.JTextFieldDateEditor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
@@ -30,7 +33,22 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
         this.idBarber = idBarber;
         this.setearTableHairCuts();
         this.getAllHairCutsDeterminateBarber();
+        this.setearDate();
+    }
 
+    private void setearDate() {
+        dateSince.setDate(new Date());
+        dateUntil.setDate(new Date());
+
+        dateSince.setDateFormatString("dd-MM-yyyy");
+        JTextFieldDateEditor editorDateSince = (JTextFieldDateEditor) dateSince.getDateEditor();
+        editorDateSince.setEditable(false);
+        editorDateSince.setHorizontalAlignment(JTextField.CENTER);
+
+        dateUntil.setDateFormatString("dd-MM-yyyy");
+        JTextFieldDateEditor editorDateUntil = (JTextFieldDateEditor) dateUntil.getDateEditor();
+        editorDateUntil.setEditable(false);
+        editorDateUntil.setHorizontalAlignment(JTextField.CENTER);
     }
 
     //_____________________ METODOS PARA MANIPULAR LA TABLA DE CORTE DE PELOS __________________________
@@ -297,7 +315,7 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
                     .addComponent(dateUntil, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnSearchBarberDate, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -310,9 +328,10 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();

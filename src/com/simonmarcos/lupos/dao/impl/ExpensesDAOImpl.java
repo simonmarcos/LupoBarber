@@ -31,18 +31,17 @@ public class ExpensesDAOImpl implements DAOExpenses {
             c = myConnection.connect();
             if (c != null) {
 
-                String consultaSQL = "INSERT INTO Expenses (idExpenses,category,type,date,description,value) VALUES (?,?,?,?,?,?)";
+                String consultaSQL = "INSERT INTO Expenses (category,type,date,description,value) VALUES (?,?,?,?,?)";
                 PreparedStatement ps = null;
 
                 try {
 
                     ps = c.prepareStatement(consultaSQL);
-                    ps.setInt(1, o.getIdExpenses());
-                    ps.setString(2, o.getCategory());
-                    ps.setString(3, o.getType());
-                    ps.setDate(4, o.getDate());
-                    ps.setString(5, o.getDescription());
-                    ps.setDouble(6, o.getValue());
+                    ps.setString(1, o.getCategory());
+                    ps.setString(2, o.getType());
+                    ps.setDate(3, o.getDate());
+                    ps.setString(4, o.getDescription());
+                    ps.setDouble(5, o.getValue());
 
                     r = ps.executeUpdate();
                     ps.close();

@@ -27,16 +27,11 @@ public class ConnectionDB {
     public Connection connect() {
 
         try {
-            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/luposbarber", "root", "");
+            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/lupobarber", "root", "");
             isConected = true;
         } catch (SQLException ex) {
-            try {
-                c = DriverManager.getConnection("jdbc:mysql://localhost:3306/luposbarber", "root", "");
-                isConected = true;
-            } catch (SQLException ex1) {
-                JOptionPane.showMessageDialog(null, "No se pudo conectar a la base de datos.");
-
-            }
+            JOptionPane.showMessageDialog(null, "No se pudo conectar a la base de datos.");
+            c = null;
         }
         return c;
     }

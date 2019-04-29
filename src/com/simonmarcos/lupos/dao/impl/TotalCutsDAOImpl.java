@@ -33,7 +33,7 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
             c = myConnection.connect();
             if (c != null) {
 
-                String consultaSQL = "INSERT INTO totalcuts (idTotalCuts,cutsAdult,cutsBoy,cutsBeard,cutsDrawing,date,earningsTotal,earningsLupos) VALUES (?,?,?,?,?,?,?,?)";
+                String consultaSQL = "INSERT INTO totalcuts1 (idTotalCuts,cutsAdult,cutsBeard,cutsDrawing,cutsEyabrow,cutsWashes,date,earningsTotal,earningsLupos) VALUES (?,?,?,?,?,?,?,?,?)";
                 PreparedStatement ps = null;
 
                 try {
@@ -41,12 +41,13 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
                     ps = c.prepareStatement(consultaSQL);
                     ps.setInt(1, o.getIdTotalCuts());
                     ps.setInt(2, o.getCutsAdult());
-                    ps.setInt(3, o.getCutsBoy());
-                    ps.setInt(4, o.getCutsBeard());
-                    ps.setInt(5, o.getCutsDrawing());
-                    ps.setDate(6, o.getDate());
-                    ps.setDouble(7, o.getEarningsTotal());
-                    ps.setDouble(8, o.getEarningsLupos());
+                    ps.setInt(3, o.getCutsBeard());
+                    ps.setInt(4, o.getCutsDrawing());
+                    ps.setInt(5, o.getCutsEyabrow());
+                    ps.setInt(6, o.getCutsWashes());
+                    ps.setDate(7, o.getDate());
+                    ps.setDouble(8, o.getEarningsTotal());
+                    ps.setDouble(9, o.getEarningsLupos());
 
                     r = ps.executeUpdate();
                     ps.close();
@@ -82,7 +83,7 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
         List<TotalCuts> list = null;
         if (c != null) {
             try {
-                String consultaSQL = "SELECT idTotalCuts,cutsAdult,cutsBoy,cutsBeard,cutsDrawing,date,earningsTotal,earningsLupos FROM TotalCuts";
+                String consultaSQL = "SELECT idTotalCuts,cutsAdult,cutsBeard,cutsDrawing,date,earningsTotal,earningsLupos FROM TotalCuts1";
 
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ResultSet rs = ps.executeQuery();
@@ -92,7 +93,6 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
                     TotalCuts tc = new TotalCuts();
                     tc.setIdTotalCuts(rs.getInt("idTotalCuts"));
                     tc.setCutsAdult(rs.getInt("cutsAdult"));
-                    tc.setCutsBoy(rs.getInt("cutsBoy"));
                     tc.setCutsBeard(rs.getInt("cutsBeard"));
                     tc.setCutsDrawing(rs.getInt("cutsDrawing"));
                     tc.setDate(rs.getDate("date"));
@@ -129,7 +129,7 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
         int r = 3;
         if (c != null) {
             try {
-                PreparedStatement ps = c.prepareStatement("DELETE FROM TotalCuts WHERE `totalcuts`.`date` = ?");
+                PreparedStatement ps = c.prepareStatement("DELETE FROM TotalCuts1 WHERE `totalcuts1`.`date` = ?");
                 ps.setString(1, date);
 
                 r = ps.executeUpdate();
@@ -158,7 +158,7 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
             try {
                 //Si quiere las ganancias total del negocio sin descontar lo de los barberos
 
-                consultaSQL += "SELECT `totalcuts`.`idTotalCuts`,`TotalCuts`.`CutsAdult`,totalCuts.`CutsBoy`,`TotalCuts`.`CutsBeard`,`TotalCuts`.`CutsDrawing`,totalCuts.`date`,totalCuts.`earningsTotal`,totalCuts.`earningsLupos` FROM TotalCuts WHERE MONTH(`totalcuts`.`date`) = ? AND YEAR(`totalcuts`.`date`) = ?";
+                consultaSQL += "SELECT `totalcuts1`.`idTotalCuts`,`TotalCuts1`.`CutsAdult`,`TotalCuts1`.`CutsBeard`,`TotalCuts1`.`CutsWashes`,`TotalCuts1`.`CutsEyabrow`,`TotalCuts1`.`CutsDrawing`,totalCuts1.`date`,totalCuts1.`earningsTotal`,totalCuts1.`earningsLupos` FROM TotalCuts1 WHERE MONTH(`totalcuts1`.`date`) = ? AND YEAR(`totalcuts1`.`date`) = ?";
 
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ps.setInt(1, month);
@@ -170,9 +170,10 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
                     TotalCuts tc = new TotalCuts();
                     tc.setIdTotalCuts(rs.getInt("idTotalCuts"));
                     tc.setCutsAdult(rs.getInt("cutsAdult"));
-                    tc.setCutsBoy(rs.getInt("cutsBoy"));
                     tc.setCutsBeard(rs.getInt("cutsBeard"));
                     tc.setCutsDrawing(rs.getInt("cutsDrawing"));
+                    tc.setCutsEyabrow(rs.getInt("cutsEyabrow"));
+                    tc.setCutsWashes(rs.getInt("cutsWashes"));
                     tc.setDate(rs.getDate("date"));
                     tc.setEarningsTotal(rs.getDouble("earningsTotal"));
                     tc.setEarningsLupos(rs.getDouble("earningsLupos"));
@@ -205,7 +206,7 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
             try {
                 //Si quiere las ganancias total del negocio sin descontar lo de los barberos
 
-                consultaSQL += "SELECT `totalcuts`.`idTotalCuts`,`TotalCuts`.`CutsAdult`,totalCuts.`CutsBoy`,`TotalCuts`.`CutsBeard`,`TotalCuts`.`CutsDrawing`,totalCuts.`date`,totalCuts.`earningsTotal`,totalCuts.`earningsLupos` FROM `totalcuts` WHERE `totalcuts`.`date` BETWEEN ? AND ?";
+                consultaSQL += "SELECT `totalcuts1`.`idTotalCuts`,`TotalCuts1`.`CutsAdult`,`TotalCuts1`.`CutsBeard`,`TotalCuts1`.`CutsDrawing`,`TotalCuts1`.`CutsEyabrow`,`TotalCuts1`.`CutsWashes`,totalCuts1.`date`,totalCuts1.`earningsTotal`,totalCuts1.`earningsLupos` FROM `totalcuts1` WHERE `totalcuts1`.`date` BETWEEN ? AND ?";
 
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ps.setString(1, since);
@@ -217,9 +218,10 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
                     TotalCuts tc = new TotalCuts();
                     tc.setIdTotalCuts(rs.getInt("idTotalCuts"));
                     tc.setCutsAdult(rs.getInt("cutsAdult"));
-                    tc.setCutsBoy(rs.getInt("cutsBoy"));
                     tc.setCutsBeard(rs.getInt("cutsBeard"));
                     tc.setCutsDrawing(rs.getInt("cutsDrawing"));
+                    tc.setCutsEyabrow(rs.getInt("cutsEyabrow"));
+                    tc.setCutsWashes(rs.getInt("cutsWashes"));
                     tc.setDate(rs.getDate("date"));
                     tc.setEarningsTotal(rs.getDouble("earningsTotal"));
                     tc.setEarningsLupos(rs.getDouble("earningsLupos"));
@@ -249,7 +251,7 @@ public class TotalCutsDAOImpl implements DAOTotalCuts {
         double valueTotal = 0;
         if (c != null) {
             try {
-                String consultaSQL = "SELECT SUM(`totalcuts`.`earningsLupos`) AS valueTotal FROM `totalcuts` WHERE `totalcuts`.`date` BETWEEN ? AND ?";
+                String consultaSQL = "SELECT SUM(`totalcuts1`.`earningsLupos`) AS valueTotal FROM `totalcuts1` WHERE `totalcuts1`.`date` BETWEEN ? AND ?";
                 PreparedStatement ps = c.prepareStatement(consultaSQL);
                 ps.setString(1, since);
                 ps.setString(2, until);

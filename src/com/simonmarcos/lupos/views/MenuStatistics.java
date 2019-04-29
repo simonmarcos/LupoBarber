@@ -45,6 +45,8 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
     private Map<Integer, Integer> mapCutsBoy = null;
     private Map<Integer, Integer> mapCutsBeard = null;
     private Map<Integer, Integer> mapCutsDrawing = null;
+    private Map<Integer, Integer> mapCutsEyabrows = null;
+    private Map<Integer, Integer> mapCutsWashes = null;
     private Map<Integer, Double> mapMonthAndEarningsTotal = null;
     private Map<Integer, Double> mapMonthAndEarningsLupos = null;
 
@@ -54,7 +56,8 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
     private List<Expenses> listExpensesFinal = null;
     private String[] arrayExpensesPersonal = {"Auto", "Boliche", "Comida", "Nafta", "Otros"};
     private String[] arrayExpensesBarberia = {"Alquiler", "Arreglos", "Internet", "Insumos", "Luz", "Otros"};
-    private String[] arrayExpensesEmpleados = {"Sueldo", "Otros"};
+    private String[] arrayExpensesEmpleados = {"Sueldo", "Corte Regalo", "Otros"};
+    private String[] arrayExpensesClientes = {"Corte Regalo"};
 
     public MenuStatistics(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -98,9 +101,12 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
                 } else if (listCategory.getSelectedItem().toString().equalsIgnoreCase("Barbería")) {
                     listTypeExpenses.setEnabled(true);
                     setearListTypeExpenses(arrayExpensesBarberia);
-                } else {
+                } else if (listCategory.getSelectedItem().toString().equalsIgnoreCase("Empleados")) {
                     listTypeExpenses.setEnabled(true);
                     setearListTypeExpenses(arrayExpensesEmpleados);
+                } else {
+                    listTypeExpenses.setEnabled(true);
+                    setearListTypeExpenses(arrayExpensesClientes);
                 }
             }
         });
@@ -112,6 +118,8 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         dateExpenses.setDate(new Date());
         dateSinceEarningsTotal.setDate(new Date());
         dateUntilEarningsTotal.setDate(new Date());
+        dateSinceExpenses.setDate(new Date());
+        dateUntilExpenses.setDate(new Date());
 
         dateSince.setDateFormatString("dd-MM-yyyy");
         JTextFieldDateEditor editorDateSince = (JTextFieldDateEditor) dateSince.getDateEditor();
@@ -153,6 +161,8 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         lblCutsAdult.setText("");
         lblCutsBeard.setText("");
         lblCutsDrawing.setText("");
+        lblCutsEyebrows.setText("");
+        lblCutsWashes.setText("");
         lblEarningsLupos.setText("");
         lblEarningsTotal.setText("");
         lblStatictisDriagram.setToolTipText("Esta sección nos permitirá generar un reporte y un diagrama con información correspondiente al año especificado");
@@ -247,18 +257,20 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
 
         //Inicializamos todas las variables que me guardaran todos los datos obtenidos de la base de datos
         mapCutsAdult = new HashMap<>();
-        mapCutsBoy = new HashMap<>();
-        mapCutsBeard = new HashMap<>();
         mapCutsDrawing = new HashMap<>();
+        mapCutsBeard = new HashMap<>();
+        mapCutsWashes = new HashMap<>();
+        mapCutsEyabrows = new HashMap<>();
         mapMonthAndEarningsLupos = new HashMap<>();
         mapMonthAndEarningsTotal = new HashMap<>();
 
         //DefaultCategoryDataset ds = new DefaultCategoryDataset();
         for (int i = 0; i < listMonth.length; i++) {
             int cutsAdult = 0;
-            int cutsBoy = 0;
             int cutsBeard = 0;
             int cutsDrawing = 0;
+            int cutsEyabrow = 0;
+            int cutsWashes = 0;
             double earningsLupos = 0;
             double earningsTotal = 0;
             //Obtenemos de la base de datos una lista con todos los registros de el año especificado y el mes
@@ -266,16 +278,18 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
             //Recorremos los datos obtenidos de ese mes y lo asignamos a las variables
             for (TotalCuts tc : listTC) {
                 cutsAdult += tc.getCutsAdult();
-                cutsBoy += tc.getCutsBoy();
                 cutsBeard += tc.getCutsBeard();
                 cutsDrawing += tc.getCutsDrawing();
+                cutsEyabrow += tc.getCutsEyabrow();
+                cutsWashes += tc.getCutsWashes();
                 earningsLupos += tc.getEarningsLupos();
                 earningsTotal += tc.getEarningsTotal();
             }
             mapCutsAdult.put(i + 1, cutsAdult);
-            mapCutsBoy.put(i + 1, cutsBoy);
             mapCutsBeard.put(i + 1, cutsBeard);
             mapCutsDrawing.put(i + 1, cutsDrawing);
+            mapCutsWashes.put(i + 1, cutsWashes);
+            mapCutsEyabrows.put(i + 1, cutsEyabrow);
             mapMonthAndEarningsLupos.put(i + 1, earningsLupos);
             mapMonthAndEarningsTotal.put(i + 1, earningsTotal);
         }
@@ -310,6 +324,16 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
                 dc.setValue(e.getValue(), getStringMonth(e.getKey().toString()), "");
             }
             jf = ChartFactory.createBarChart3D("Diagrama de Dibujos", "Mes", "Cortes", dc, PlotOrientation.VERTICAL, true, true, true);
+        } else if (rbCutsEyabrows.isSelected()) {
+            for (Map.Entry<Integer, Integer> e : mapCutsEyabrows.entrySet()) {
+                dc.setValue(e.getValue(), getStringMonth(e.getKey().toString()), "");
+            }
+            jf = ChartFactory.createBarChart3D("Diagrama de Cejas", "Mes", "Cortes", dc, PlotOrientation.VERTICAL, true, true, true);
+        } else if (rbCutsWashes.isSelected()) {
+            for (Map.Entry<Integer, Integer> e : mapCutsWashes.entrySet()) {
+                dc.setValue(e.getValue(), getStringMonth(e.getKey().toString()), "");
+            }
+            jf = ChartFactory.createBarChart3D("Diagrama de Lavados", "Mes", "Cortes", dc, PlotOrientation.VERTICAL, true, true, true);
         }
         ChartFrame cf = new ChartFrame("", jf);
         cf.setSize(1000, 600);
@@ -320,9 +344,10 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
 
     private void generateReport() {
         int cutsAdult = 0;
-        int cutsBoy = 0;
         int cutsBeard = 0;
         int cutsDrawing = 0;
+        int cutsEyabrow = 0;
+        int cutsWashes = 0;
         double earningsTotal = 0;
         double earningsLupos = 0;
         //Dependiendo el radio button seleccionado recorremos el map y lo ponemos en los label
@@ -331,16 +356,18 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
             cutsAdult += e.getValue();
         }
 
-        for (Map.Entry<Integer, Integer> e : mapCutsBoy.entrySet()) {
-            cutsBoy += e.getValue();
-        }
-
         for (Map.Entry<Integer, Integer> e : mapCutsBeard.entrySet()) {
             cutsBeard += e.getValue();
         }
 
         for (Map.Entry<Integer, Integer> e : mapCutsDrawing.entrySet()) {
             cutsDrawing += e.getValue();
+        }
+        for (Map.Entry<Integer, Integer> e : mapCutsEyabrows.entrySet()) {
+            cutsEyabrow += e.getValue();
+        }
+        for (Map.Entry<Integer, Integer> e : mapCutsWashes.entrySet()) {
+            cutsWashes += e.getValue();
         }
         for (Map.Entry<Integer, Double> e : mapMonthAndEarningsLupos.entrySet()) {
             earningsLupos += e.getValue();
@@ -351,6 +378,8 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         lblCutsAdult.setText(String.valueOf(cutsAdult));
         lblCutsBeard.setText(String.valueOf(cutsBeard));
         lblCutsDrawing.setText(String.valueOf(cutsDrawing));
+        lblCutsEyebrows.setText(String.valueOf(cutsEyabrow));
+        lblCutsWashes.setText(String.valueOf(cutsWashes));
         lblEarningsLupos.setText("$ " + String.valueOf(earningsLupos));
         lblEarningsTotal.setText("$ " + String.valueOf(earningsTotal));
     }
@@ -382,18 +411,20 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
 
         List<TotalCuts> listTC = new TotalCutsDAOImpl().queryGetBySinceAndUntil(dateSinceString, dateUntilString);
         int cutsAdult = 0;
-        int cutsBoy = 0;
         int cutsBeard = 0;
         int cutsDrawing = 0;
+        int cutsEyabrow = 0;
+        int cutsWashes = 0;
         double earningsTotal = 0;
         double earningsLupos = 0;
         //Dependiendo el radio button seleccionado recorremos el map y lo ponemos en los label
 
         for (TotalCuts tc : listTC) {
             cutsAdult += tc.getCutsAdult();
-            cutsBoy += tc.getCutsBoy();
             cutsBeard += tc.getCutsBeard();
             cutsDrawing += tc.getCutsDrawing();
+            cutsEyabrow += tc.getCutsEyabrow();
+            cutsWashes += tc.getCutsWashes();
             earningsLupos += tc.getEarningsLupos();
             earningsTotal += tc.getEarningsTotal();
         }
@@ -401,6 +432,8 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         lblCutsAdult.setText(String.valueOf(cutsAdult));
         lblCutsBeard.setText(String.valueOf(cutsBeard));
         lblCutsDrawing.setText(String.valueOf(cutsDrawing));
+        lblCutsEyebrows.setText(String.valueOf(cutsEyabrow));
+        lblCutsWashes.setText(String.valueOf(cutsWashes));
         lblEarningsLupos.setText("$ " + String.valueOf(earningsLupos));
         lblEarningsTotal.setText("$ " + String.valueOf(earningsTotal));
     }
@@ -419,28 +452,28 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
     }
 
     /*private void generateReportFinal() {
-        try {
-            JasperReport jasperReport = (JasperReport) JRLoader.loadObject("src\\report\\Report.jasper");
+     try {
+     JasperReport jasperReport = (JasperReport) JRLoader.loadObject("src\\report\\Report.jasper");
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String dateSinceString = sdf.format(dateSinceEarningsTotal.getDate());
-            String dateUntilString = sdf.format(dateUntilEarningsTotal.getDate());
+     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+     String dateSinceString = sdf.format(dateSinceEarningsTotal.getDate());
+     String dateUntilString = sdf.format(dateUntilEarningsTotal.getDate());
 
-            Map<String, String> dates = new HashMap<>();
-            dates.put("dateSince", dateSinceString);
-            dates.put("dateUntil", dateUntilString);
+     Map<String, String> dates = new HashMap<>();
+     dates.put("dateSince", dateSinceString);
+     dates.put("dateUntil", dateUntilString);
 
-            Connection c = ConnectionDB.instanciar().connect();
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, dates, c);
-            System.out.println(jasperReport.);
-            JasperViewer jasperView = new JasperViewer(jasperPrint, false);
-            jasperView.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            jasperView.setTitle("REPORTE LUPOS BARBER");
-            jasperView.setVisible(true);
-        } catch (JRException ex) {
-            Logger.getLogger(MenuStatistics.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }*/
+     Connection c = ConnectionDB.instanciar().connect();
+     JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, dates, c);
+     System.out.println(jasperReport.);
+     JasperViewer jasperView = new JasperViewer(jasperPrint, false);
+     jasperView.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+     jasperView.setTitle("REPORTE LUPOS BARBER");
+     jasperView.setVisible(true);
+     } catch (JRException ex) {
+     Logger.getLogger(MenuStatistics.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }*/
     private void saveExpenses() {
         if (!txtValueExpenses.getText().isEmpty()) {
             DAO dao = new ExpensesDAOImpl();
@@ -697,6 +730,12 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         jLabel9 = new javax.swing.JLabel();
         lblEarningsTotal = new javax.swing.JLabel();
         rbEarningsTotal = new javax.swing.JRadioButton();
+        jLabel15 = new javax.swing.JLabel();
+        lblCutsEyebrows = new javax.swing.JLabel();
+        lblCutsWashes = new javax.swing.JLabel();
+        jLabel16 = new javax.swing.JLabel();
+        rbCutsEyabrows = new javax.swing.JRadioButton();
+        rbCutsWashes = new javax.swing.JRadioButton();
         pestanaReporte = new javax.swing.JPanel();
         dateSinceEarningsTotal = new com.toedter.calendar.JDateChooser();
         dateUntilEarningsTotal = new com.toedter.calendar.JDateChooser();
@@ -705,7 +744,6 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         lblEarningsTotalGeneral = new javax.swing.JLabel();
         lblExpesesTotal = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
         btnCalculateValueTotal = new javax.swing.JButton();
         lblEarningDefinitivas = new javax.swing.JLabel();
 
@@ -721,7 +759,7 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         jLabel1.setText("TIPO");
 
         listCategory.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        listCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Barbería", "Empleados", "Personal" }));
+        listCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Barbería", "Empleados", "Personal", "Clientes" }));
         listCategory.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         listCategory.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -791,36 +829,37 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(296, 296, 296)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addGap(11, 11, 11)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(txtValueExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
-                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(dateExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(listCategory, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(listTypeExpenses, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addContainerGap(269, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnSaveExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(351, 351, 351))
+                .addContainerGap(299, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addGap(11, 11, 11)
+                                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(txtValueExpenses))
+                                .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(dateExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(listCategory, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(listTypeExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(266, 266, 266))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnSaveExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(347, 347, 347))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(37, 37, 37)
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(listCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -840,9 +879,9 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtValueExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(btnSaveExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(47, 47, 47))
+                .addContainerGap(64, Short.MAX_VALUE))
         );
 
         pestanas.addTab("Gastos General", jPanel1);
@@ -892,35 +931,32 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblCountCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(146, 146, 146))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(lblCountCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(779, 779, 779)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(txtSearchExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, 503, Short.MAX_VALUE)))
+                        .addComponent(txtSearchExpenses)))
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
-                .addGap(22, 22, 22)
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtSearchExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addGap(9, 9, 9)
-                        .addComponent(lblCountCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblCountCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         jPanel10.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -959,7 +995,7 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         jPanel10.setLayout(jPanel10Layout);
         jPanel10Layout.setHorizontalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 931, Short.MAX_VALUE)
+            .addComponent(jScrollPane3)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
                 .addGap(57, 57, 57)
                 .addComponent(dateSinceExpenses, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -978,7 +1014,7 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
                     .addComponent(dateUntilExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnSearchExpenses, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
@@ -991,7 +1027,7 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -1082,7 +1118,7 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
                 .addComponent(jListYear, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                .addContainerGap(16, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(lblReport, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1173,15 +1209,48 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         groupSearchAvanced.add(rbEarningsTotal);
         rbEarningsTotal.setText("GRAFICO GANANCIAS TOTAL");
 
+        jLabel15.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
+        jLabel15.setText("Cejas:");
+
+        lblCutsEyebrows.setBackground(new java.awt.Color(255, 255, 255));
+        lblCutsEyebrows.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblCutsEyebrows.setForeground(new java.awt.Color(255, 0, 0));
+        lblCutsEyebrows.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblCutsEyebrows.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+
+        lblCutsWashes.setBackground(new java.awt.Color(255, 255, 255));
+        lblCutsWashes.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblCutsWashes.setForeground(new java.awt.Color(255, 0, 0));
+        lblCutsWashes.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblCutsWashes.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+
+        jLabel16.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
+        jLabel16.setText("Lavados:");
+
+        groupSearchAvanced.add(rbCutsEyabrows);
+        rbCutsEyabrows.setText("GRAFICO CEJAS");
+
+        groupSearchAvanced.add(rbCutsWashes);
+        rbCutsWashes.setText("GRAFICO LAVADOS");
+        rbCutsWashes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbCutsWashesActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelStatisticsLayout = new javax.swing.GroupLayout(panelStatistics);
         panelStatistics.setLayout(panelStatisticsLayout);
         panelStatisticsLayout.setHorizontalGroup(
             panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelStatisticsLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelStatisticsLayout.createSequentialGroup()
+                        .addContainerGap()
                         .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelStatisticsLayout.createSequentialGroup()
+                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(panelStatisticsLayout.createSequentialGroup()
                                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1191,79 +1260,85 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lblEarningsLupos, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(panelStatisticsLayout.createSequentialGroup()
-                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(73, 73, 73)
-                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(rbCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(rbEarningsLupos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(rbEarningsTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE))
-                        .addContainerGap(118, Short.MAX_VALUE))
-                    .addGroup(panelStatisticsLayout.createSequentialGroup()
-                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(panelStatisticsLayout.createSequentialGroup()
                                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(73, 73, 73)
-                                .addComponent(rbCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(panelStatisticsLayout.createSequentialGroup()
                                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(73, 73, 73)
-                                .addComponent(rbCutsDrawing))
+                                .addComponent(lblCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(panelStatisticsLayout.createSequentialGroup()
-                                .addGap(287, 287, 287)
-                                .addComponent(btnOpenGraphics, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblCutsEyebrows, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(panelStatisticsLayout.createSequentialGroup()
+                                .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblCutsWashes, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(73, 73, 73)
+                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(rbCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(rbEarningsLupos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(rbEarningsTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE))
+                            .addComponent(rbCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(rbCutsDrawing)
+                            .addComponent(rbCutsEyabrows)
+                            .addComponent(rbCutsWashes)))
+                    .addGroup(panelStatisticsLayout.createSequentialGroup()
+                        .addGap(299, 299, 299)
+                        .addComponent(btnOpenGraphics, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(118, Short.MAX_VALUE))
         );
         panelStatisticsLayout.setVerticalGroup(
             panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelStatisticsLayout.createSequentialGroup()
-                .addGap(36, 36, 36)
                 .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(rbEarningsTotal, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblEarningsLupos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(rbEarningsLupos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(11, 11, 11)
-                .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelStatisticsLayout.createSequentialGroup()
-                        .addGap(1, 1, 1)
-                        .addComponent(rbCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(rbEarningsTotal, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(7, 7, 7)
                 .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelStatisticsLayout.createSequentialGroup()
-                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(3, 3, 3))
-                    .addGroup(panelStatisticsLayout.createSequentialGroup()
-                        .addGap(3, 3, 3)
-                        .addComponent(rbCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(panelStatisticsLayout.createSequentialGroup()
                         .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 4, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelStatisticsLayout.createSequentialGroup()
-                        .addGap(4, 4, 4)
-                        .addComponent(rbCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(15, 15, 15)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblEarningsLupos, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(7, 7, 7)
+                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(7, 7, 7)
+                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(7, 7, 7)
+                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(7, 7, 7)
+                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblCutsEyebrows, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(7, 7, 7)
+                        .addGroup(panelStatisticsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblCutsWashes, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(panelStatisticsLayout.createSequentialGroup()
+                        .addComponent(rbEarningsLupos, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(rbCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(7, 7, 7)
+                        .addComponent(rbCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(7, 7, 7)
+                        .addComponent(rbCutsDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(rbCutsEyabrows, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(rbCutsWashes, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnOpenGraphics, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 53, Short.MAX_VALUE))
+                .addContainerGap(53, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -1312,13 +1387,6 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         jLabel14.setFont(new java.awt.Font("Arial", 3, 14)); // NOI18N
         jLabel14.setText("Ganancias definitivas:");
 
-        jButton2.setText("IMPRIMIR REPORTE");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
-
         btnCalculateValueTotal.setBackground(new java.awt.Color(0, 153, 204));
         btnCalculateValueTotal.setFont(new java.awt.Font("Arial Unicode MS", 3, 22)); // NOI18N
         btnCalculateValueTotal.setForeground(new java.awt.Color(255, 255, 255));
@@ -1343,32 +1411,27 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
             pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pestanaReporteLayout.createSequentialGroup()
                 .addContainerGap(223, Short.MAX_VALUE)
-                .addGroup(pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pestanaReporteLayout.createSequentialGroup()
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(329, 329, 329))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pestanaReporteLayout.createSequentialGroup()
-                        .addGroup(pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(pestanaReporteLayout.createSequentialGroup()
-                                .addGroup(pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(dateSinceEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(dateUntilEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnCalculateValueTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(pestanaReporteLayout.createSequentialGroup()
-                                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(lblEarningsTotalGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(pestanaReporteLayout.createSequentialGroup()
-                                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(lblExpesesTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(pestanaReporteLayout.createSequentialGroup()
-                                    .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(lblEarningDefinitivas, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(206, 206, 206))))
+                .addGroup(pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(pestanaReporteLayout.createSequentialGroup()
+                        .addGroup(pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(dateSinceEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dateUntilEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnCalculateValueTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pestanaReporteLayout.createSequentialGroup()
+                            .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(lblEarningsTotalGeneral, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(pestanaReporteLayout.createSequentialGroup()
+                            .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(lblExpesesTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(pestanaReporteLayout.createSequentialGroup()
+                            .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(lblEarningDefinitivas, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(206, 206, 206))
         );
         pestanaReporteLayout.setVerticalGroup(
             pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1392,9 +1455,7 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
                 .addGroup(pestanaReporteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblEarningDefinitivas, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(117, Short.MAX_VALUE))
+                .addContainerGap(170, Short.MAX_VALUE))
         );
 
         pestanas.addTab("Estadísticas General", pestanaReporte);
@@ -1407,7 +1468,7 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pestanas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(pestanas, javax.swing.GroupLayout.PREFERRED_SIZE, 531, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
@@ -1416,7 +1477,7 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
     private void btnOpenGraphicsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOpenGraphicsActionPerformed
         if (rbSearchDiagram.isSelected()) {
             if (rbCutsAdult.isSelected() || rbCutsBeard.isSelected()
-                    || rbCutsDrawing.isSelected() || rbEarningsTotal.isSelected() || rbEarningsLupos.isSelected()) {
+                    || rbCutsDrawing.isSelected() || rbCutsEyabrows.isSelected() || rbCutsWashes.isSelected() || rbEarningsTotal.isSelected() || rbEarningsLupos.isSelected()) {
                 this.generateReporAndStadisticGraphics(evt.getActionCommand());
             }
         }
@@ -1482,9 +1543,9 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         this.getValueTotalExpensesANDTotalCuts();
     }//GEN-LAST:event_btnCalculateValueTotalActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        this.printReport();
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void rbCutsWashesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbCutsWashesActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_rbCutsWashesActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1503,13 +1564,14 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
     private javax.swing.ButtonGroup groupSearchAvanced;
     private javax.swing.ButtonGroup groupTypeSearch;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1531,6 +1593,8 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
     private javax.swing.JLabel lblCutsAdult;
     private javax.swing.JLabel lblCutsBeard;
     private javax.swing.JLabel lblCutsDrawing;
+    private javax.swing.JLabel lblCutsEyebrows;
+    private javax.swing.JLabel lblCutsWashes;
     private javax.swing.JLabel lblEarningDefinitivas;
     private javax.swing.JLabel lblEarningsLupos;
     private javax.swing.JLabel lblEarningsTotal;
@@ -1546,6 +1610,8 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
     private javax.swing.JRadioButton rbCutsAdult;
     private javax.swing.JRadioButton rbCutsBeard;
     private javax.swing.JRadioButton rbCutsDrawing;
+    private javax.swing.JRadioButton rbCutsEyabrows;
+    private javax.swing.JRadioButton rbCutsWashes;
     private javax.swing.JRadioButton rbEarningsLupos;
     private javax.swing.JRadioButton rbEarningsTotal;
     private javax.swing.JRadioButton rbSearchDiagram;

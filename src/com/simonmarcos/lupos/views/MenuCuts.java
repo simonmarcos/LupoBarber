@@ -88,6 +88,7 @@ public class MenuCuts extends javax.swing.JDialog {
         int r = dao.modificar(idCuts, c);
         if (r == 1) {
             JOptionPane.showMessageDialog(this, "Se modificó correctamente.");
+            checkUpdate.setSelected(false);
             clearFields();
             fillListAllCuts();
         }
@@ -109,16 +110,13 @@ public class MenuCuts extends javax.swing.JDialog {
         txtType = new javax.swing.JTextField();
         checkUpdate = new javax.swing.JCheckBox();
         listAllCuts = new javax.swing.JComboBox<>();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         btnSaveCuts.setBackground(new java.awt.Color(0, 153, 204));
         btnSaveCuts.setFont(new java.awt.Font("Arial Unicode MS", 3, 14)); // NOI18N
         btnSaveCuts.setForeground(new java.awt.Color(255, 255, 255));
-        btnSaveCuts.setText("GUARDAR");
+        btnSaveCuts.setText("MODIFICAR");
         btnSaveCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         btnSaveCuts.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnSaveCuts.addActionListener(new java.awt.event.ActionListener() {
@@ -191,9 +189,12 @@ public class MenuCuts extends javax.swing.JDialog {
         jLabel3.setText("Nombre:");
         jLabel3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
+        txtType.setBackground(new java.awt.Color(102, 102, 102));
         txtType.setFont(new java.awt.Font("Arial", 1, 20)); // NOI18N
+        txtType.setForeground(new java.awt.Color(255, 255, 255));
         txtType.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         txtType.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 204)));
+        txtType.setEnabled(false);
         txtType.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtTypeKeyPressed(evt);
@@ -212,18 +213,6 @@ public class MenuCuts extends javax.swing.JDialog {
 
         listAllCuts.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         listAllCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
-
-        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(204, 0, 0));
-        jLabel5.setText("*");
-
-        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        jLabel6.setForeground(new java.awt.Color(204, 0, 0));
-        jLabel6.setText("*");
-
-        jLabel7.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        jLabel7.setForeground(new java.awt.Color(204, 0, 0));
-        jLabel7.setText("*");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -249,18 +238,13 @@ public class MenuCuts extends javax.swing.JDialog {
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(10, 10, 10)
-                                .addComponent(txtType, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(4, 4, 4)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(txtType, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(124, 124, 124)
                         .addComponent(listAllCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 344, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(checkUpdate)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(45, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(btnSaveCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -275,29 +259,23 @@ public class MenuCuts extends javax.swing.JDialog {
                     .addComponent(listAllCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(38, 38, 38)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtType, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtType, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtPrice, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtPriceBarber, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtPriceBarber, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                    .addComponent(txtPrize, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE))
+                    .addComponent(txtPrize))
                 .addGap(18, 18, 18)
                 .addComponent(btnSaveCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(54, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -331,7 +309,7 @@ public class MenuCuts extends javax.swing.JDialog {
     }//GEN-LAST:event_txtTypeKeyPressed
 
     private void txtPriceKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPriceKeyTyped
-        validarCamposNumericos(evt);
+        
     }//GEN-LAST:event_txtPriceKeyTyped
 
     private void txtPriceKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPriceKeyPressed
@@ -339,15 +317,15 @@ public class MenuCuts extends javax.swing.JDialog {
     }//GEN-LAST:event_txtPriceKeyPressed
 
     private void txtPriceBarberKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPriceBarberKeyTyped
-        validarCamposNumericos(evt);
+
     }//GEN-LAST:event_txtPriceBarberKeyTyped
 
     private void txtPriceBarberKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPriceBarberKeyPressed
-        validarCamposNumericos(evt);
+      
     }//GEN-LAST:event_txtPriceBarberKeyPressed
 
     private void txtPrizeKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPrizeKeyTyped
-        validarCamposNumericos(evt);
+        
     }//GEN-LAST:event_txtPrizeKeyTyped
 
     private void txtPrizeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPrizeKeyPressed
@@ -357,12 +335,7 @@ public class MenuCuts extends javax.swing.JDialog {
     }//GEN-LAST:event_txtPrizeKeyPressed
 
     private void btnSaveCutsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveCutsActionPerformed
-        if (checkUpdate.isSelected()) {
-            updateCuts();
-        } else {
-            saveCuts();
-
-        }
+        updateCuts();
     }//GEN-LAST:event_btnSaveCutsActionPerformed
 
     private void checkUpdateMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_checkUpdateMouseClicked
@@ -394,9 +367,6 @@ public class MenuCuts extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JComboBox<String> listAllCuts;
     private javax.swing.JTextField txtPrice;

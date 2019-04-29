@@ -9,26 +9,32 @@ public class TotalCuts {
     private int cutsBoy;
     private int cutsBeard;
     private int cutsDrawing;
+    private int cutsEyabrow;
+    private int cutsWashes;
     private java.sql.Date date;
     private double earningsTotal;
     private double earningsLupos;
 
-    public TotalCuts(int idTotalCuts, int cutsAdult, int cutsBoy, int cutsBeard, int cutsDrawing, Date date, double earningsTotal, double earningsLupos) {
+    public TotalCuts(int idTotalCuts, int cutsAdult, int cutsBoy, int cutsBeard, int cutsDrawing, int cutsEyabrow, int cutsWashes, Date date, double earningsTotal, double earningsLupos) {
         this.idTotalCuts = idTotalCuts;
         this.cutsAdult = cutsAdult;
         this.cutsBoy = cutsBoy;
         this.cutsBeard = cutsBeard;
         this.cutsDrawing = cutsDrawing;
+        this.cutsEyabrow = cutsEyabrow;
+        this.cutsWashes = cutsWashes;
         this.date = date;
         this.earningsTotal = earningsTotal;
         this.earningsLupos = earningsLupos;
     }
 
-    public TotalCuts(int cutsAdult, int cutsBoy, int cutsBeard, int cutsDrawing, Date date, double earningsTotal, double earningsLupos) {
+    public TotalCuts(int cutsAdult, int cutsBoy, int cutsBeard, int cutsDrawing, int cutsEyabrow, int cutsWashes, Date date, double earningsTotal, double earningsLupos) {
         this.cutsAdult = cutsAdult;
         this.cutsBoy = cutsBoy;
         this.cutsBeard = cutsBeard;
         this.cutsDrawing = cutsDrawing;
+        this.cutsEyabrow = cutsEyabrow;
+        this.cutsWashes = cutsWashes;
         this.date = date;
         this.earningsTotal = earningsTotal;
         this.earningsLupos = earningsLupos;
@@ -51,6 +57,22 @@ public class TotalCuts {
 
     public void setCutsAdult(int cutsAdult) {
         this.cutsAdult = cutsAdult;
+    }
+
+    public int getCutsEyabrow() {
+        return cutsEyabrow;
+    }
+
+    public void setCutsEyabrow(int cutsEyabrow) {
+        this.cutsEyabrow = cutsEyabrow;
+    }
+
+    public int getCutsWashes() {
+        return cutsWashes;
+    }
+
+    public void setCutsWashes(int cutsWashes) {
+        this.cutsWashes = cutsWashes;
     }
 
     public int getCutsBoy() {

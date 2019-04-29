@@ -1,18 +1,22 @@
 package com.simonmarcos.lupos.views;
 
+import com.simonmarcos.lupos.dao.DAO;
 import com.simonmarcos.lupos.dao.DAOBarber;
 import com.simonmarcos.lupos.dao.DAOClient;
 import com.simonmarcos.lupos.dao.DAOCuts;
+import com.simonmarcos.lupos.dao.DAOExpenses;
 import com.simonmarcos.lupos.dao.DAOHairCut;
 import com.simonmarcos.lupos.dao.DAOTotalCuts;
 import com.simonmarcos.lupos.dao.impl.BarberDAOImpl;
 import com.simonmarcos.lupos.dao.impl.ClientDAOImpl;
 import com.simonmarcos.lupos.dao.impl.CutsDAOImpl;
+import com.simonmarcos.lupos.dao.impl.ExpensesDAOImpl;
 import com.simonmarcos.lupos.dao.impl.HairCutDAOImpl;
 import com.simonmarcos.lupos.dao.impl.TotalCutsDAOImpl;
 import com.simonmarcos.lupos.model.Barber;
 import com.simonmarcos.lupos.model.Client;
 import com.simonmarcos.lupos.model.Cuts;
+import com.simonmarcos.lupos.model.Expenses;
 import com.simonmarcos.lupos.model.HairCut;
 import com.simonmarcos.lupos.model.TotalCuts;
 import java.awt.Dimension;
@@ -36,7 +40,12 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
     private DefaultTableModel dtm;
     private List<Barber> listAllBarber;
+
+    //Variables glboales
     private double prizeCuts = 0;
+    private double priceCutsLupos = 0;
+    private double priceCutsBarber = 0;
+    private double priceBeardBarber = 0;
     private Map<Integer, String> mapIdBarbers = null;
 
     public MenuPrincipal() {
@@ -44,12 +53,12 @@ public class MenuPrincipal extends javax.swing.JFrame {
         //this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setTitle("Lupo's Barber");
-        prizeCuts = new CutsDAOImpl().getPrize();
         this.dimensionWindows();
         this.setImgBtnClient();
         this.setImgBtnBarber();
         this.setImgBtnStadistics();
-        this.setImgPanelLogoLupos();
+        //this.setImgPanelLogoLupos();
+        this.setImgBtnCuts();
         this.setearTableBarberCuts();
         this.fillTableBarberCuts();
         this.fillListAllClient();
@@ -99,6 +108,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
     private void dimensionWindows() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
         int width = (int) screenSize.getWidth();
         int height = (int) screenSize.getHeight();
         this.setSize(width, height);
@@ -115,6 +125,10 @@ public class MenuPrincipal extends javax.swing.JFrame {
         checkCutAdult.setSelected(false);
         checkCutBeard.setSelected(false);
         checkCutDrawing.setSelected(false);
+        checkWashed.setSelected(false);
+        checkEyebrow.setSelected(false);
+        checkPresentCuts.setSelected(false);
+        checkPresentBeard.setSelected(false);
 
         combolistAllClient.setSelectedIndex(0);
         combolistAllBarber.setSelectedIndex(0);
@@ -155,9 +169,11 @@ public class MenuPrincipal extends javax.swing.JFrame {
         tc.setCutsAdult(Integer.parseInt(lblCutsAdult.getText().split(": ")[1].trim()));
         tc.setCutsBeard(Integer.parseInt(lblCutsBeard.getText().split(": ")[1].trim()));
         tc.setCutsDrawing(Integer.parseInt(lblCutsDraw.getText().split(": ")[1].trim()));
+        tc.setCutsEyabrow(Integer.parseInt(lblCutsEyebrows.getText().split(": ")[1].trim()));
+        tc.setCutsWashes(Integer.parseInt(lblCutsWashed.getText().split(": ")[1].trim()));
         tc.setDate(new java.sql.Date(new java.util.Date().getTime()));
         tc.setEarningsTotal(Double.parseDouble(lblEarningsTotal.getText().split(": ")[1].trim()));
-        tc.setEarningsLupos(Double.parseDouble(lblEarnings.getText().split(": ")[1].trim()));
+        tc.setEarningsLupos(Double.parseDouble(llbEarningsExpensesToday.getText()));
 
         //Primero eliminamos los datos en la fecha actual si es que los hay
         int rDelete = daoDelete.deleteByDate(tc.getDate().toString());
@@ -177,15 +193,13 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
     //_________________________________________________________________________________________________________
     //METODOS PARA GUARDAR EL CORTE EN LA BASE DE DATOS
-    private void saveCuts() {
-        DAOHairCut dao = new HairCutDAOImpl();
-
+    private void saveCuts(String regalo) {
         String idClient = "";
         String nameClient = "";
         String idBarber = "";
         String nameBarber = "";
-        String totalPrice = "";
-        String totalPriceBarber = "";
+        double totalPrice = 0;
+        double totalPriceBarber = 0;
         String cutsFinal = "";
 
         //--------------------------------------------------------------
@@ -199,6 +213,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         }
         Client c = new Client();
         c.setIdClient(Integer.parseInt(idClient));
+        c.setLastName(nameClient);
 
         //------------------------------------------------------------
         for (int i = 0; i < getIdBarberForListBarber().length; i++) {
@@ -217,10 +232,29 @@ public class MenuPrincipal extends javax.swing.JFrame {
         for (int i = 0; i < getPrice.length; i++) {
             switch (i) {
                 case 0:
-                    totalPrice += getPrice[i];
+                    //EN EL CASO DE QUE EL CORTE SEA UN REGALO SOLO LE PAGAMOS AL BARBERO Y NO FACTURAMOS EN EL LOCAL
+                    //Y LO GUARDAMOS COMO UN GASTO EN LA BASE DE DATOS
+                    if (regalo.equalsIgnoreCase("SI")) {
+                        if (checkPresentBeard.isSelected() && !checkPresentCuts.isSelected()) {
+                            totalPrice += Double.valueOf(getPrice[i]);
+                            this.setPrices("BARBA");
+                            saveExpenses(c, priceBeardBarber);
+                        } else if (checkPresentCuts.isSelected() && !checkPresentBeard.isSelected()) {
+                            totalPrice += Double.valueOf(getPrice[i]);
+                            this.setPrices("CORTE");
+                            saveExpenses(c, (priceCutsBarber));
+                        } else if (checkPresentCuts.isSelected() && checkPresentBeard.isSelected()) {
+                            totalPrice += Double.valueOf(getPrice[i]);
+                            this.setPrices("CORTE");
+                            this.setPrices("BARBA");
+                            saveExpenses(c, (priceBeardBarber + priceCutsBarber));
+                        }
+                    } else {
+                        totalPrice += Double.valueOf(getPrice[i]);
+                    }
                     break;
                 case 1:
-                    totalPriceBarber += getPrice[i];
+                    totalPriceBarber += Double.valueOf(getPrice[i]);
                     break;
                 default:
                     cutsFinal += getPrice[i];
@@ -233,14 +267,32 @@ public class MenuPrincipal extends javax.swing.JFrame {
         h.setBarber(b);
         h.setCuts(cutsFinal);
         h.setDate(new java.sql.Timestamp(System.currentTimeMillis()));
-        h.setPrice(Double.parseDouble(totalPrice));
-        h.setPriceBarber(Double.parseDouble(totalPriceBarber));
+        if (regalo.equalsIgnoreCase("NO")) {
+            h.setPrice(totalPrice);
+        } else {
+            h.setPrice(0);
+        }
+        h.setPriceBarber(totalPriceBarber);
+        DAOHairCut dao = new HairCutDAOImpl();
         int r = dao.save(h);
         if (r == 1) {
             JOptionPane.showMessageDialog(this, "Barbero: " + nameBarber + " \nCliente: " + nameClient + " \nCorte: " + cutsFinal + " \nPrecio Total: $" + totalPrice + "\n\n¡¡MUCHAS GRACIAS!!");
             clearAllFields();
             updateTableHairCutsBarber();
+
         }
+    }
+
+    private void saveExpenses(Client c, double totalExpense) {
+        DAO dao = new ExpensesDAOImpl();
+        Expenses exp = new Expenses();
+        exp.setCategory("Cliente");
+        exp.setType("Corte regalo");
+        exp.setDate(new java.sql.Date(new java.util.Date().getTime()));
+        exp.setDescription(c.getLastName());
+        System.out.println(totalExpense);
+        exp.setValue(totalExpense);
+        dao.save(exp);
     }
 
     //Metodo que me devolvera el precio total del corte segun los checks seleccionados.
@@ -255,11 +307,13 @@ public class MenuPrincipal extends javax.swing.JFrame {
         boolean cutAdultSelected = checkCutAdult.isSelected();
         boolean cutBeardSelected = checkCutBeard.isSelected();
         boolean cutDrawingSelected = checkCutDrawing.isSelected();
+        boolean cutEyebrowSelected = checkEyebrow.isSelected();
+        boolean cutWashedSelected = checkWashed.isSelected();
 
         double totalPrice = 0;
         double totalPriceBarber = 0;
         //Si solo esta seleccionado el check de CutsAdult
-        if (cutAdultSelected && !cutBeardSelected && !cutDrawingSelected) {
+        if (cutAdultSelected && !cutBeardSelected && !cutDrawingSelected && !cutEyebrowSelected && !cutWashedSelected) {
             for (Cuts c : listCuts) {
                 if (c.getType().equalsIgnoreCase(checkCutAdult.getText())) {
                     totalPrice = c.getPrice();
@@ -268,7 +322,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
             cutsFinal += checkCutAdult.getText();
         }//Si solo esta seleccionado el cutAdult y el cutBeard
-        else if (cutAdultSelected && cutBeardSelected && !cutDrawingSelected) {
+        else if (cutAdultSelected && cutBeardSelected && !cutDrawingSelected && !cutEyebrowSelected && !cutWashedSelected) {
             for (Cuts c : listCuts) {
                 if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkCutBeard.getText())) {
                     totalPrice += c.getPrice();
@@ -277,7 +331,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
             cutsFinal += checkCutAdult.getText() + " / " + checkCutBeard.getText();
         } //Si solo esta seleccionado el cutAdult y el cutDrawing 
-        else if (cutAdultSelected && !cutBeardSelected && cutDrawingSelected) {
+        else if (cutAdultSelected && !cutBeardSelected && cutDrawingSelected && !cutEyebrowSelected && !cutWashedSelected) {
             for (Cuts c : listCuts) {
                 if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkCutDrawing.getText())) {
                     totalPrice += c.getPrice();
@@ -286,7 +340,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
             cutsFinal += checkCutAdult.getText() + " / " + checkCutDrawing.getText();
         } //Si solo esta seleccionado el cutAdult y el cutDrawing y cutBeard
-        else if (cutAdultSelected && cutBeardSelected && cutDrawingSelected) {
+        else if (cutAdultSelected && cutBeardSelected && cutDrawingSelected && !cutEyebrowSelected && !cutWashedSelected) {
             for (Cuts c : listCuts) {
                 if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkCutBeard.getText()) || c.getType().equalsIgnoreCase(checkCutDrawing.getText())) {
                     totalPrice += c.getPrice();
@@ -296,7 +350,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             cutsFinal += checkCutAdult.getText() + " / " + checkCutBeard.getText() + " / " + checkCutDrawing.getText();
 
         }//Si solo esta seleccionado el  checkDrawing
-        else if (!cutAdultSelected && !cutBeardSelected && cutDrawingSelected) {
+        else if (!cutAdultSelected && !cutBeardSelected && cutDrawingSelected && !cutEyebrowSelected && !cutWashedSelected) {
             for (Cuts c : listCuts) {
                 if (c.getType().equalsIgnoreCase(checkCutDrawing.getText())) {
                     totalPrice += c.getPrice();
@@ -305,7 +359,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
             cutsFinal += checkCutDrawing.getText();
         } //Si solo esta seleccionado el checkBeard
-        else if (!cutAdultSelected && cutBeardSelected && !cutDrawingSelected) {
+        else if (!cutAdultSelected && cutBeardSelected && !cutDrawingSelected && !cutEyebrowSelected && !cutWashedSelected) {
             for (Cuts c : listCuts) {
                 if (c.getType().equalsIgnoreCase(checkCutBeard.getText())) {
                     totalPrice += c.getPrice();
@@ -314,7 +368,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
             cutsFinal += checkCutBeard.getText();
         } //Si esta seleccionado el checkBeard y checkDrawing
-        else if (!cutAdultSelected && cutBeardSelected && cutDrawingSelected) {
+        else if (!cutAdultSelected && cutBeardSelected && cutDrawingSelected && !cutEyebrowSelected && !cutWashedSelected) {
             for (Cuts c : listCuts) {
                 if (c.getType().equalsIgnoreCase(checkCutBeard.getText()) || c.getType().equalsIgnoreCase(checkCutDrawing.getText())) {
                     totalPrice += c.getPrice();
@@ -323,7 +377,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
             cutsFinal += checkCutBeard.getText() + " / " + checkCutDrawing.getText();
         }//En el caso de que todos los check esten seleccionados
-        else if (cutAdultSelected && cutBeardSelected && cutDrawingSelected) {
+        else if (cutAdultSelected && cutBeardSelected && cutDrawingSelected && !cutEyebrowSelected && !cutWashedSelected) {
             for (Cuts c : listCuts) {
                 if (c.getType().equalsIgnoreCase(checkCutDrawing.getText()) || c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkCutBeard.getText())) {
                     totalPrice += c.getPrice();
@@ -331,16 +385,152 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 }
             }
             cutsFinal += checkCutAdult.getText() + " / " + checkCutBeard.getText() + " / " + checkCutDrawing.getText();
+        } //En el caso de que esten seleccionados todos
+        else if (cutAdultSelected && cutBeardSelected && cutDrawingSelected && cutEyebrowSelected && cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutDrawing.getText()) || c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkCutBeard.getText()) || c.getType().equalsIgnoreCase(checkWashed.getText()) || c.getType().equalsIgnoreCase(checkEyebrow.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutAdult.getText() + " / " + checkCutBeard.getText() + " / " + checkCutDrawing.getText() + " / " + checkEyebrow.getText() + " / " + checkWashed.getText();
+        }//En el caso de que esten seleccionados cortes y lavado
+        else if (cutAdultSelected && !cutBeardSelected && !cutDrawingSelected && !cutEyebrowSelected && cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkWashed.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutAdult.getText() + " / " + checkWashed.getText();
+        }//En el caso de que esten seleccionados cortes y cejas
+        else if (cutAdultSelected && !cutBeardSelected && !cutDrawingSelected && cutEyebrowSelected && !cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkEyebrow.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutAdult.getText() + " / " + checkEyebrow.getText();
+        }//En el caso de que esten seleccionados lavado y cejas
+        else if (!cutAdultSelected && !cutBeardSelected && !cutDrawingSelected && cutEyebrowSelected && cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkEyebrow.getText()) || c.getType().equalsIgnoreCase(checkWashed.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkWashed.getText() + " / " + checkEyebrow.getText();
+        }//En el caso de que esten seleccionados cortes y lavado y cejas
+        else if (cutAdultSelected && !cutBeardSelected && !cutDrawingSelected && cutEyebrowSelected && cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkWashed.getText()) || c.getType().equalsIgnoreCase(checkEyebrow.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutAdult.getText() + " / " + checkEyebrow.getText() + " / " + checkWashed.getText();
+        }//En el caso de que esten seleccionados cortes y lavado y barba
+        else if (cutAdultSelected && cutBeardSelected && !cutDrawingSelected && !cutEyebrowSelected && cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkWashed.getText()) || c.getType().equalsIgnoreCase(checkCutBeard.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutAdult.getText() + " / " + checkCutBeard.getText() + " / " + checkWashed.getText();
+        }//En el caso de que esten seleccionados cortes y cejas y barba
+        else if (cutAdultSelected && cutBeardSelected && !cutDrawingSelected && cutEyebrowSelected && !cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkEyebrow.getText()) || c.getType().equalsIgnoreCase(checkCutBeard.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutAdult.getText() + " / " + checkCutBeard.getText() + " / " + checkEyebrow.getText();
+        }//En el caso de que esten seleccionados cortes y dibujo y lavado
+        else if (cutAdultSelected && !cutBeardSelected && cutDrawingSelected && !cutEyebrowSelected && cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkWashed.getText()) || c.getType().equalsIgnoreCase(checkCutDrawing.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutAdult.getText() + " / " + checkWashed.getText() + " / " + checkCutDrawing.getText();
+        }//En el caso de que esten seleccionados cortes y dibujo y cejas
+        else if (cutAdultSelected && !cutBeardSelected && cutDrawingSelected && cutEyebrowSelected && !cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutAdult.getText()) || c.getType().equalsIgnoreCase(checkEyebrow.getText()) || c.getType().equalsIgnoreCase(checkCutDrawing.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutAdult.getText() + " / " + checkEyebrow.getText() + " / " + checkCutDrawing.getText();
+        }//En el caso de que esten seleccionados solo ceja
+        else if (!cutAdultSelected && !cutBeardSelected && !cutDrawingSelected && cutEyebrowSelected && !cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkEyebrow.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkEyebrow.getText();
+        }//En el caso de que esten seleccionados solo lavado
+        else if (!cutAdultSelected && !cutBeardSelected && !cutDrawingSelected && !cutEyebrowSelected && cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkWashed.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkWashed.getText();
+        }//En el caso de que esten seleccionados solo barba y ceja y lavado
+        else if (!cutAdultSelected && cutBeardSelected && !cutDrawingSelected && cutEyebrowSelected && cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutBeard.getText()) || c.getType().equalsIgnoreCase(checkEyebrow.getText()) || c.getType().equalsIgnoreCase(checkWashed.getText())) {
+                    System.out.println(c.getPrice());
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutBeard.getText() + " / " + checkEyebrow.getText() + " / " + checkWashed.getText();
+        }//En el caso de que esten seleccionados solo barba y ceja 
+        else if (!cutAdultSelected && cutBeardSelected && !cutDrawingSelected && cutEyebrowSelected && !cutWashedSelected) {
+            for (Cuts c : listCuts) {
+                if (c.getType().equalsIgnoreCase(checkCutBeard.getText()) || c.getType().equalsIgnoreCase(checkEyebrow.getText())) {
+                    totalPrice += c.getPrice();
+                    totalPriceBarber += c.getPriceBarber();
+                }
+            }
+            cutsFinal += checkCutBeard.getText() + " / " + checkEyebrow.getText();
         }
         String[] stringReturn = {String.valueOf(totalPrice), String.valueOf(totalPriceBarber), cutsFinal};
         return stringReturn;
+    }
+
+    //Set variables globales que la usaremos para los cortes de regalos y premios al barbero
+    private void setPrices(String cuts) {
+        //Obtenemos los precios de los cortes
+        DAOCuts dao = new CutsDAOImpl();
+        double[] prices = null;
+        if (cuts.equalsIgnoreCase("BARBA")) {
+            prices = dao.getPrizeANDPrice("BARBA");
+            priceBeardBarber = 0;
+            priceBeardBarber = prices[0];
+        } else {
+            prices = dao.getPrizeANDPrice("CORTE");
+            priceCutsLupos = 0;
+            priceCutsBarber = 0;
+            priceCutsLupos += prices[0];
+            priceCutsBarber += prices[1];
+        }
     }
 
     //__________________________________________________________________________________________________________
     //METODOS PARA MANIPULAR LA TABLA DE LOS CORTES
     private void setearTableBarberCuts() {
         dtm = new DefaultTableModel();
-        String[] columns = {"Barbero", "Cortes", "Barbas", "Dibujos", "Ganancias"};
+        String[] columns = {"Barbero", "Cortes", "Barbas", "Dibujos", "Cejas", "Lavados", "Ganancias"};
         dtm.setColumnIdentifiers(columns);
         tableBarberCuts.setModel(dtm);
 
@@ -355,6 +545,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
         tableBarberCuts.getColumnModel().getColumn(2).setCellRenderer(new CellManagement());
         tableBarberCuts.getColumnModel().getColumn(3).setCellRenderer(new CellManagement());
         tableBarberCuts.getColumnModel().getColumn(4).setCellRenderer(new CellManagement());
+        tableBarberCuts.getColumnModel().getColumn(5).setCellRenderer(new CellManagement());
+        tableBarberCuts.getColumnModel().getColumn(6).setCellRenderer(new CellManagement());
 
         //Codigo para especificar el tamaño de las celdas
         tableBarberCuts.setRowHeight(30);
@@ -363,7 +555,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }
 
     private void fillTableBarberCuts() {
-        String[] fila = new String[5];
+        String[] fila = new String[7];
         listAllBarber = this.getAllBarber();
         listAllBarber.stream().sorted().forEach(b -> {
             mapIdBarbers = new HashMap();
@@ -373,6 +565,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
             fila[2] = "0";
             fila[3] = "0";
             fila[4] = "0";
+            fila[5] = "0";
+            fila[6] = "0";
             dtm.addRow(fila);
         });
         tableBarberCuts.setModel(dtm);
@@ -401,11 +595,15 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 String cutsAdult = tableBarberCuts.getValueAt(i, 1).toString();
                 String cutsBeard = tableBarberCuts.getValueAt(i, 2).toString();
                 String cutsDrawing = tableBarberCuts.getValueAt(i, 3).toString();
-                String priceCuts = tableBarberCuts.getValueAt(i, 4).toString();
+                String cutsWashed = tableBarberCuts.getValueAt(i, 5).toString();
+                String cutsEyebrows = tableBarberCuts.getValueAt(i, 4).toString();
+                String priceCuts = tableBarberCuts.getValueAt(i, 6).toString();
 
                 int countCutsAdult = 0;
                 int countCutsBeard;
                 int countCutsDrawing;
+                int countCutsWashed;
+                int countCutsEyebrows;
                 double totalPriceCuts;
 
                 //Obtenemos el valor en esa fila
@@ -425,28 +623,37 @@ public class MenuPrincipal extends javax.swing.JFrame {
                         } else if (nameCuts.contains("Dibujo")) {
                             countCutsDrawing = Integer.parseInt(cutsDrawing) + 1;
                             tableBarberCuts.setValueAt(String.valueOf(countCutsDrawing), i, 3);
+                        } else if (nameCuts.contains("Lavado")) {
+                            countCutsWashed = Integer.parseInt(cutsWashed) + 1;
+                            tableBarberCuts.setValueAt(String.valueOf(countCutsWashed), i, 5);
+                        } else if (nameCuts.contains("Cejas")) {
+                            countCutsEyebrows = Integer.parseInt(cutsEyebrows) + 1;
+                            tableBarberCuts.setValueAt(String.valueOf(countCutsEyebrows), i, 4);
                         }
                         totalPriceCuts = Double.valueOf(priceCuts);
                         totalPriceCuts += hc.getPriceBarber();
-                        tableBarberCuts.setValueAt(String.valueOf(totalPriceCuts), i, 4);
+                        tableBarberCuts.setValueAt(String.valueOf(totalPriceCuts), i, 6);
                     }
                 }
             }
         }
-        this.checkCutsHigher10();
+        //this.checkCutsHigher11();
         this.getAllCutsAndEarningTheDay(earningsBoss);
     }
 
-    //Metodo para verificar si en cortes va 10 y darle el premio
-    private void checkCutsHigher10() {
+    //Metodo para verificar si en cortes va 11 y darle el premio
+    private void checkCutsHigher11() {
         int row = tableBarberCuts.getRowCount();
         for (int i = 0; i < row; i++) {
             int countCutsAdult = Integer.parseInt(tableBarberCuts.getValueAt(i, 1).toString());
-            double totalEarningsBarber = Double.valueOf(tableBarberCuts.getValueAt(i, 4).toString());
-            int countPrize = (countCutsAdult / 10) * 10;
-            totalEarningsBarber += countPrize;
+            double totalEarningsBarber = 0;
+            if (countCutsAdult == 11) {
+                totalEarningsBarber += Double.valueOf(tableBarberCuts.getValueAt(i, 6).toString());
+                prizeCuts = new CutsDAOImpl().getPrizeANDPrice("")[0];
+                totalEarningsBarber += prizeCuts;
+                tableBarberCuts.setValueAt(String.valueOf(totalEarningsBarber), i, 6);
+            }
 
-            tableBarberCuts.setValueAt(String.valueOf(totalEarningsBarber), i, 4);
         }
     }
 
@@ -468,7 +675,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                         idBarber = entry.getKey();
                     }
                 }
-                double totalEarningsBarber = Double.valueOf(tableBarberCuts.getValueAt(i, 4).toString());
+                double totalEarningsBarber = Double.valueOf(tableBarberCuts.getValueAt(i, 6).toString());
                 int countPrize = (countCutsAdult / 10) * 10;
 
                 HairCut hc = new HairCut();
@@ -500,20 +707,27 @@ public class MenuPrincipal extends javax.swing.JFrame {
         int countHairCutsAdult = 0;
         int countHairCutsBeader = 0;
         int countHairCutsDrawing = 0;
+        int countHairCutsWashed = 0;
+        int countHairCutsEyebrows = 0;
         double countEarnings = 0;
 
         for (int i = 0; i < row; i++) {
             countHairCutsAdult += Integer.parseInt(tableBarberCuts.getValueAt(i, 1).toString());
             countHairCutsBeader += Integer.parseInt(tableBarberCuts.getValueAt(i, 2).toString());
             countHairCutsDrawing += Integer.parseInt(tableBarberCuts.getValueAt(i, 3).toString());
-            countEarnings += Double.parseDouble(tableBarberCuts.getValueAt(i, 4).toString());
+            countHairCutsEyebrows += Integer.parseInt(tableBarberCuts.getValueAt(i, 4).toString());
+            countHairCutsWashed += Integer.parseInt(tableBarberCuts.getValueAt(i, 5).toString());
+            countEarnings += Double.parseDouble(tableBarberCuts.getValueAt(i, 6).toString());
         }
 
-        lblCutsAdult.setText("Cortes Adultos: " + countHairCutsAdult);
-        lblCutsBeard.setText("Barba: " + countHairCutsBeader);
+        lblCutsAdult.setText("Cortes: " + countHairCutsAdult);
+        lblCutsBeard.setText("Barbas: " + countHairCutsBeader);
         lblCutsDraw.setText("Dibujos: " + countHairCutsDrawing);
+        lblCutsEyebrows.setText("Cejas: " + countHairCutsEyebrows);
+        lblCutsWashed.setText("Lavados: " + countHairCutsWashed);
         lblEarningsTotal.setText("Ganancias Total: " + earnings);
-        lblEarnings.setText("Ganancias: " + (earnings - countEarnings));
+        lblEarnings.setText("Ganancias: " + (earnings - countEarnings - getExpensesToday()));
+        llbEarningsExpensesToday.setText("" + (earnings - countEarnings));
     }
 
     //______________________________________________________________________________________________________________
@@ -564,6 +778,20 @@ public class MenuPrincipal extends javax.swing.JFrame {
         return barber;
     }
 
+    private double getExpensesToday() {
+        double totalExpenses = 0;
+        String dateToday = getDateToday();
+        DAOExpenses dao = new ExpensesDAOImpl();
+        List<Expenses> list = dao.queryFilterForDateBetwen(dateToday, dateToday);
+
+        for (Expenses ex : list) {
+            if (ex.getType().equalsIgnoreCase("OTROS")) {
+                totalExpenses += ex.getValue();
+            }
+        }
+        return totalExpenses;
+    }
+
     //______________________________________________________________________________________________________________
     //METODOS PARA COLOCAR IMAGENES A LOS BOTONES
     private void setImgBtnClient() {
@@ -582,11 +810,18 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
     }
 
-    private void setImgPanelLogoLupos() {
+    /*private void setImgPanelLogoLupos() {
 
-        Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoLupos.jpg"));
-        Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(logoLuposBarber.getWidth(), logoLuposBarber.getHeight(), Image.SCALE_DEFAULT));
-        logoLuposBarber.setIcon(iconSearch);
+     Image imgSearch = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/logoLupos.jpg"));
+     Icon iconSearch = new ImageIcon(imgSearch.getScaledInstance(logoLuposBarber.getWidth(), logoLuposBarber.getHeight(), Image.SCALE_DEFAULT));
+     logoLuposBarber.setIcon(iconSearch);
+
+     }*/
+    private void setImgBtnCuts() {
+
+        Image imgCut = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resources/cuts.png"));
+        Icon iconSearch = new ImageIcon(imgCut.getScaledInstance(btnCut.getWidth(), btnCut.getHeight(), Image.SCALE_DEFAULT));
+        btnCut.setIcon(iconSearch);
 
     }
 
@@ -634,9 +869,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tablaCumpleanos1 = new javax.swing.JTable();
-        panelLogoLupos = new javax.swing.JPanel();
-        logoLuposBarber = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         miLamina5 = new javax.swing.JPanel();
         btnBarber = new javax.swing.JButton();
         btnCuts = new javax.swing.JButton();
@@ -644,6 +876,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         btnClient = new javax.swing.JButton();
+        btnCut = new javax.swing.JButton();
+        jLabel6 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         tableBarberCuts = new javax.swing.JTable();
@@ -658,11 +892,18 @@ public class MenuPrincipal extends javax.swing.JFrame {
         checkCutDrawing = new javax.swing.JCheckBox();
         btnSaveTotalCuts = new javax.swing.JButton();
         lblCutsBeard = new javax.swing.JLabel();
-        lblCutsDraw = new javax.swing.JLabel();
+        lblCutsWashed = new javax.swing.JLabel();
         lblEarningsTotal = new javax.swing.JLabel();
         lblCutsAdult = new javax.swing.JLabel();
         lblEarnings = new javax.swing.JLabel();
         btnUpdate = new javax.swing.JButton();
+        checkEyebrow = new javax.swing.JCheckBox();
+        checkWashed = new javax.swing.JCheckBox();
+        lblCutsDraw = new javax.swing.JLabel();
+        lblCutsEyebrows = new javax.swing.JLabel();
+        checkPresentCuts = new javax.swing.JCheckBox();
+        checkPresentBeard = new javax.swing.JCheckBox();
+        llbEarningsExpensesToday = new javax.swing.JLabel();
 
         jFrame1.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         jFrame1.setBackground(new java.awt.Color(0, 0, 0));
@@ -1100,39 +1341,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        panelLogoLupos.setBackground(new java.awt.Color(255, 255, 255));
-        panelLogoLupos.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-
-        jButton1.setBackground(new java.awt.Color(0, 153, 204));
-        jButton1.setFont(new java.awt.Font("Arial Unicode MS", 3, 14)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("CORTES");
-        jButton1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout panelLogoLuposLayout = new javax.swing.GroupLayout(panelLogoLupos);
-        panelLogoLupos.setLayout(panelLogoLuposLayout);
-        panelLogoLuposLayout.setHorizontalGroup(
-            panelLogoLuposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelLogoLuposLayout.createSequentialGroup()
-                .addComponent(logoLuposBarber, javax.swing.GroupLayout.DEFAULT_SIZE, 740, Short.MAX_VALUE)
-                .addGap(50, 50, 50)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(52, 52, 52))
-        );
-        panelLogoLuposLayout.setVerticalGroup(
-            panelLogoLuposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(logoLuposBarber, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLogoLuposLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
         miLamina5.setBackground(new java.awt.Color(255, 255, 255));
         miLamina5.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
@@ -1179,46 +1387,57 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
         });
 
+        btnCut.setBackground(new java.awt.Color(255, 255, 255));
+        btnCut.setFont(new java.awt.Font("Arial Unicode MS", 3, 14)); // NOI18N
+        btnCut.setForeground(new java.awt.Color(255, 255, 255));
+        btnCut.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153), 4));
+        btnCut.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCutActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setFont(new java.awt.Font("Comic Sans MS", 3, 24)); // NOI18N
+        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel6.setText("CORTES");
+
         javax.swing.GroupLayout miLamina5Layout = new javax.swing.GroupLayout(miLamina5);
         miLamina5.setLayout(miLamina5Layout);
         miLamina5Layout.setHorizontalGroup(
             miLamina5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(miLamina5Layout.createSequentialGroup()
-                .addGap(66, 66, 66)
-                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(miLamina5Layout.createSequentialGroup()
-                .addContainerGap(18, Short.MAX_VALUE)
+                .addGap(28, 28, 28)
                 .addGroup(miLamina5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(miLamina5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(btnBarber, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(miLamina5Layout.createSequentialGroup()
-                            .addGap(25, 25, 25)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(24, 24, 24))
-                        .addComponent(btnClient, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, miLamina5Layout.createSequentialGroup()
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(42, 42, 42)))
-                    .addComponent(btnCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18))
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCut, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnBarber, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnClient, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(28, Short.MAX_VALUE))
         );
         miLamina5Layout.setVerticalGroup(
             miLamina5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, miLamina5Layout.createSequentialGroup()
-                .addGap(11, 11, 11)
-                .addComponent(btnClient, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(11, 11, 11)
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(40, 40, 40)
-                .addComponent(btnBarber, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(miLamina5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnClient, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(4, 4, 4)
+                .addComponent(btnBarber, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(40, 40, 40)
-                .addComponent(btnCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(11, 11, 11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(11, 11, 11))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCut, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
@@ -1295,7 +1514,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         checkCutDrawing.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         btnSaveTotalCuts.setBackground(new java.awt.Color(0, 153, 204));
-        btnSaveTotalCuts.setFont(new java.awt.Font("Arial Unicode MS", 3, 18)); // NOI18N
+        btnSaveTotalCuts.setFont(new java.awt.Font("Arial Unicode MS", 3, 14)); // NOI18N
         btnSaveTotalCuts.setForeground(new java.awt.Color(255, 255, 255));
         btnSaveTotalCuts.setText("GUARDAR");
         btnSaveTotalCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
@@ -1306,15 +1525,15 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
         });
 
-        lblCutsBeard.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblCutsBeard.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         lblCutsBeard.setForeground(new java.awt.Color(204, 0, 0));
         lblCutsBeard.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblCutsBeard.setText("jLabel9");
 
-        lblCutsDraw.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        lblCutsDraw.setForeground(new java.awt.Color(204, 0, 0));
-        lblCutsDraw.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblCutsDraw.setText("jLabel9");
+        lblCutsWashed.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        lblCutsWashed.setForeground(new java.awt.Color(204, 0, 0));
+        lblCutsWashed.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblCutsWashed.setText("jLabel9");
 
         lblEarningsTotal.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         lblEarningsTotal.setForeground(new java.awt.Color(204, 0, 0));
@@ -1322,7 +1541,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         lblEarningsTotal.setText("jLabel9");
         lblEarningsTotal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 0, 0), 2));
 
-        lblCutsAdult.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        lblCutsAdult.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         lblCutsAdult.setForeground(new java.awt.Color(204, 0, 0));
         lblCutsAdult.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblCutsAdult.setText("jLabel9");
@@ -1334,7 +1553,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         lblEarnings.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 0, 0), 2));
 
         btnUpdate.setBackground(new java.awt.Color(0, 153, 204));
-        btnUpdate.setFont(new java.awt.Font("Arial Unicode MS", 3, 18)); // NOI18N
+        btnUpdate.setFont(new java.awt.Font("Arial Unicode MS", 3, 14)); // NOI18N
         btnUpdate.setForeground(new java.awt.Color(255, 255, 255));
         btnUpdate.setText("ACTUALIZAR");
         btnUpdate.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
@@ -1345,6 +1564,50 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
         });
 
+        checkEyebrow.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        checkEyebrow.setText("Cejas");
+
+        checkWashed.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        checkWashed.setText("Lavado");
+
+        lblCutsDraw.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        lblCutsDraw.setForeground(new java.awt.Color(204, 0, 0));
+        lblCutsDraw.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblCutsDraw.setText("jLabel9");
+
+        lblCutsEyebrows.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        lblCutsEyebrows.setForeground(new java.awt.Color(204, 0, 0));
+        lblCutsEyebrows.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblCutsEyebrows.setText("jLabel9");
+
+        checkPresentCuts.setBackground(new java.awt.Color(0, 0, 0));
+        checkPresentCuts.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        checkPresentCuts.setForeground(new java.awt.Color(204, 204, 204));
+        checkPresentCuts.setText("CORTE");
+        checkPresentCuts.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255), 2));
+        checkPresentCuts.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkPresentCutsActionPerformed(evt);
+            }
+        });
+
+        checkPresentBeard.setBackground(new java.awt.Color(0, 0, 0));
+        checkPresentBeard.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        checkPresentBeard.setForeground(new java.awt.Color(204, 204, 204));
+        checkPresentBeard.setText("BARBA");
+        checkPresentBeard.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255), 2));
+        checkPresentBeard.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkPresentBeardActionPerformed(evt);
+            }
+        });
+
+        llbEarningsExpensesToday.setBackground(new java.awt.Color(255, 255, 255));
+        llbEarningsExpensesToday.setFont(new java.awt.Font("Tahoma", 0, 1)); // NOI18N
+        llbEarningsExpensesToday.setForeground(new java.awt.Color(255, 255, 255));
+        llbEarningsExpensesToday.setText("jLabel7");
+        llbEarningsExpensesToday.setEnabled(false);
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -1354,87 +1617,116 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(combolistAllClient, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(lblClientSection, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(combolistAllBarber, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(lblBarberSection, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 90, Short.MAX_VALUE)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(btnConfirm, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addGap(68, 68, 68)
-                                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(lblCutsSection, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
-                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                                                .addComponent(checkCutBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(checkCutDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(checkCutAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(107, 107, 107))))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(btnSaveTotalCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 336, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(124, 124, 124))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(31, 31, 31)
-                                .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(lblCutsDraw, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(lblEarnings, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE)
-                            .addComponent(lblEarningsTotal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addContainerGap(34, Short.MAX_VALUE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGap(45, 45, 45)
+                                .addComponent(btnSaveTotalCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 336, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(34, 34, 34)
+                                .addComponent(llbEarningsExpensesToday, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblCutsDraw, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblCutsEyebrows, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(lblCutsWashed, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lblEarnings, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                            .addComponent(lblEarningsTotal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(combolistAllBarber, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lblBarberSection, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lblClientSection, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(combolistAllClient, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGap(4, 4, 4)
+                                .addComponent(btnConfirm, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGap(41, 41, 41)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(checkPresentBeard, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(checkPresentCuts, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                                        .addComponent(checkCutAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(checkWashed)
+                                        .addGap(59, 59, 59))
+                                    .addComponent(btnUpdate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblCutsSection, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(jPanel3Layout.createSequentialGroup()
+                                        .addGap(10, 10, 10)
+                                        .addComponent(checkCutBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(checkCutDrawing)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(checkEyebrow, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(0, 0, Short.MAX_VALUE)))))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(11, 11, 11)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(lblBarberSection, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(combolistAllBarber, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblClientSection, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(combolistAllClient, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(9, 9, 9))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(btnConfirm, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(checkPresentCuts)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(checkPresentBeard)
+                        .addGap(5, 5, 5))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createSequentialGroup()
                         .addComponent(lblCutsSection, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(checkCutAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(checkCutDrawing, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(checkCutBeard, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                                .addComponent(lblBarberSection, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(combolistAllBarber, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblClientSection, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(btnConfirm, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(checkCutAdult, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
+                            .addComponent(checkWashed, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(checkCutBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(checkCutDrawing, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(checkEyebrow, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(combolistAllClient, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblCutsDraw, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblEarnings, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnSaveTotalCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblCutsBeard, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCutsAdult, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCutsWashed, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblEarnings, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCutsDraw, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCutsEyebrows, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblEarningsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnSaveTotalCuts, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(llbEarningsExpensesToday, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1445,20 +1737,12 @@ public class MenuPrincipal extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(miLamina5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(panelLogoLupos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(panelLogoLupos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(miLamina5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+            .addComponent(miLamina5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -1530,7 +1814,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_jFrame2formKeyPressed
 
     private void btnBarberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBarberActionPerformed
-        MenuBarber mb = new MenuBarber(this, false);
+        MenuBarber mb = new MenuBarber(this, true);
         mb.setVisible(true);
 //        while (true) {
 //            String pass = JOptionPane.showInputDialog(this, "Ingrese la contraseña para ingresar");
@@ -1567,7 +1851,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCutsActionPerformed
 
     private void btnClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClientActionPerformed
-        MenuClient mc = new MenuClient(null, true);
+        MenuClient mc = new MenuClient(this, true);
         mc.setVisible(true);
 //        while (true) {
 //            String pass = JOptionPane.showInputDialog(this, "Ingrese la contraseña para ingresar");
@@ -1595,8 +1879,14 @@ public class MenuPrincipal extends javax.swing.JFrame {
             boolean cutAdultSelected = checkCutAdult.isSelected();
             boolean cutBeardSelected = checkCutBeard.isSelected();
             boolean cutDrawingSelected = checkCutDrawing.isSelected();
-            if (cutAdultSelected || cutBeardSelected || cutDrawingSelected) {
-                saveCuts();
+            boolean cutWashedSelected = checkWashed.isSelected();
+            boolean cutEyebrowsSelected = checkEyebrow.isSelected();
+            if (cutAdultSelected || cutBeardSelected || cutDrawingSelected || cutWashedSelected || cutEyebrowsSelected) {
+                if (checkPresentBeard.isSelected() || checkPresentCuts.isSelected()) {
+                    saveCuts("SI");
+                } else {
+                    saveCuts("NO");
+                }
                 this.updateTableHairCutsBarber();
             } else {
                 JOptionPane.showMessageDialog(this, "Debe seleccionar un corte.");
@@ -1604,7 +1894,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Debe seleccionar el cliente/barbero.");
         }
-
     }//GEN-LAST:event_btnConfirmActionPerformed
 
     private void btnSaveTotalCutsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveTotalCutsActionPerformed
@@ -1618,13 +1907,29 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         this.fillListAllBarber();
         this.fillListAllClient();
-        this.updateTableHairCutsBarber();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnCutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCutActionPerformed
         MenuCuts mc = new MenuCuts(this, false);
         mc.setVisible(true);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnCutActionPerformed
+
+    private void checkPresentCutsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkPresentCutsActionPerformed
+        if (checkPresentCuts.isSelected()) {
+            checkCutAdult.setSelected(true);
+        } else {
+            checkCutAdult.setSelected(false);
+        }
+
+    }//GEN-LAST:event_checkPresentCutsActionPerformed
+
+    private void checkPresentBeardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkPresentBeardActionPerformed
+        if (checkPresentBeard.isSelected()) {
+            checkCutBeard.setSelected(true);
+        } else {
+            checkCutBeard.setSelected(false);
+        }
+    }//GEN-LAST:event_checkPresentBeardActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAntecedentes;
@@ -1638,6 +1943,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton btnCambiarTema4;
     private javax.swing.JButton btnClient;
     private javax.swing.JButton btnConfirm;
+    private javax.swing.JButton btnCut;
     private javax.swing.JButton btnCuts;
     private javax.swing.JButton btnDetallePrestacion;
     private javax.swing.JButton btnDetallePrestacion1;
@@ -1650,11 +1956,14 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JCheckBox checkCutAdult;
     private javax.swing.JCheckBox checkCutBeard;
     private javax.swing.JCheckBox checkCutDrawing;
+    private javax.swing.JCheckBox checkEyebrow;
+    private javax.swing.JCheckBox checkPresentBeard;
+    private javax.swing.JCheckBox checkPresentCuts;
+    private javax.swing.JCheckBox checkWashed;
     private javax.swing.JComboBox<String> combolistAllBarber;
     private javax.swing.JComboBox<String> combolistAllClient;
     private javax.swing.JLabel imgLogo;
     private javax.swing.JLabel imgLogo1;
-    private javax.swing.JButton jButton1;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JFrame jFrame2;
     private javax.swing.JLabel jLabel1;
@@ -1662,6 +1971,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -1673,16 +1983,17 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel lblCutsAdult;
     private javax.swing.JLabel lblCutsBeard;
     private javax.swing.JLabel lblCutsDraw;
+    private javax.swing.JLabel lblCutsEyebrows;
     private javax.swing.JLabel lblCutsSection;
+    private javax.swing.JLabel lblCutsWashed;
     private javax.swing.JLabel lblEarnings;
     private javax.swing.JLabel lblEarningsTotal;
-    private javax.swing.JLabel logoLuposBarber;
+    private javax.swing.JLabel llbEarningsExpensesToday;
     private javax.swing.JPanel miLamina;
     private javax.swing.JPanel miLamina1;
     private javax.swing.JPanel miLamina2;
     private javax.swing.JPanel miLamina3;
     private javax.swing.JPanel miLamina5;
-    private javax.swing.JPanel panelLogoLupos;
     private javax.swing.JTable tablaCumpleanos;
     private javax.swing.JTable tablaCumpleanos1;
     private javax.swing.JTable tableBarberCuts;
