@@ -108,11 +108,11 @@ public class MenuBarber extends javax.swing.JDialog {
         String[] fila = new String[8];
         list.stream().sorted().forEach(c -> {
             fila[0] = String.valueOf(c.getIdBarber());
-            fila[2] = c.getName();
-            fila[1] = c.getLastName();
+            fila[2] = c.getName().toUpperCase();
+            fila[1] = c.getLastName().toUpperCase();
             fila[3] = String.valueOf(c.getDni());
             fila[4] = c.getPhone();
-            fila[5] = c.getAddress();
+            fila[5] = c.getAddress().toUpperCase();
             fila[6] = String.valueOf(c.getBirthday());
             fila[7] = String.valueOf(c.getDateEntry());
             dtm.addRow(fila);

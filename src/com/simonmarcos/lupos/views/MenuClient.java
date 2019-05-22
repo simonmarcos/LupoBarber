@@ -7,7 +7,6 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Icon;
@@ -113,8 +112,8 @@ public class MenuClient extends javax.swing.JDialog {
         String[] fila = new String[6];
         list.stream().sorted().forEach(c -> {
             fila[0] = String.valueOf(c.getIdClient());
-            fila[2] = c.getName();
-            fila[1] = c.getLastName();
+            fila[2] = c.getName().toUpperCase();
+            fila[1] = c.getLastName().toUpperCase();
             fila[3] = String.valueOf(c.getDNI());
             fila[4] = c.getPhone();
             if (c.getBirthday() != null) {

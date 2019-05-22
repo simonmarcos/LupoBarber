@@ -513,6 +513,9 @@
                           <Table columnCount="0" rowCount="4"/>
                         </Property>
                       </Properties>
+                      <Events>
+                        <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="tableListExpensesKeyPressed"/>
+                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>

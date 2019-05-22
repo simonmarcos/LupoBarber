@@ -114,9 +114,9 @@ public class MenuHairCutsBarber extends javax.swing.JDialog {
 
                 //Llamamos al metodo y obtenemos un string con el nombre y apellido correspondiente al ID
                 String[] info = this.searchClientByID(hairCut.getClient().getIdClient());
-                fila[1] = info[1] + " " + info[0];
+                fila[1] = info[1].toUpperCase() + " " + info[0].toUpperCase();
 
-                fila[2] = hairCut.getCuts();
+                fila[2] = hairCut.getCuts().toUpperCase();
                 fila[3] = String.valueOf(hairCut.getPriceBarber());
 
                 dtm.addRow(fila);

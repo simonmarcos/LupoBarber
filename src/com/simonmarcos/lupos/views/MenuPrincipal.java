@@ -279,7 +279,6 @@ public class MenuPrincipal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Barbero: " + nameBarber + " \nCliente: " + nameClient + " \nCorte: " + cutsFinal + " \nPrecio Total: $" + totalPrice + "\n\n¡¡MUCHAS GRACIAS!!");
             clearAllFields();
             updateTableHairCutsBarber();
-
         }
     }
 
@@ -1907,6 +1906,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         this.fillListAllBarber();
         this.fillListAllClient();
+        this.updateTableHairCutsBarber();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnCutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCutActionPerformed

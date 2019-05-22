@@ -500,10 +500,10 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
         String[] fila = new String[6];
         list.stream().forEach(e -> {
             fila[0] = String.valueOf(e.getIdExpenses());
-            fila[1] = e.getCategory();
-            fila[2] = e.getType();
+            fila[1] = e.getCategory().toUpperCase();
+            fila[2] = e.getType().toUpperCase();
             fila[3] = e.getDate().toString();
-            fila[4] = e.getDescription();
+            fila[4] = e.getDescription().toUpperCase();
             fila[5] = String.valueOf(e.getValue());
 
             dtm.addRow(fila);
@@ -973,6 +973,11 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
 
             }
         ));
+        tableListExpenses.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                tableListExpensesKeyPressed(evt);
+            }
+        });
         jScrollPane3.setViewportView(tableListExpenses);
 
         dateUntilExpenses.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
@@ -1546,6 +1551,24 @@ public class MenuStatistics extends javax.swing.JDialog implements Printable {
     private void rbCutsWashesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbCutsWashesActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_rbCutsWashesActionPerformed
+
+    private void tableListExpensesKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tableListExpensesKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
+            int r = JOptionPane.showConfirmDialog(this, "¿Desea eliminar?");
+            if (r == 0) {
+                int index = tableListExpenses.getSelectedRow();
+                int idExpenses = Integer.parseInt(tableListExpenses.getValueAt(index, 0).toString());
+                DAO dao = new ExpensesDAOImpl();
+                int delete = dao.delete(idExpenses);
+                if (delete == 1) {
+                    JOptionPane.showMessageDialog(this, "Se eliminó correctamente.");
+                    listExpenses.removeIf(e -> String.valueOf(e.getIdExpenses()).equalsIgnoreCase(String.valueOf(idExpenses)));
+                    this.setearTableListExpenses();
+                    this.fillTableListExpenses(listExpenses);
+                }
+            }
+        }
+    }//GEN-LAST:event_tableListExpensesKeyPressed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

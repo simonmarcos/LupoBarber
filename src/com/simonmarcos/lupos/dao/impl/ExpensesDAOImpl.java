@@ -183,7 +183,7 @@ public class ExpensesDAOImpl implements DAOExpenses {
         int r = 0;
         if (c != null) {
             try {
-                PreparedStatement ps = c.prepareStatement("DELETE FROM Expenses WHERE dni=?");
+                PreparedStatement ps = c.prepareStatement("DELETE FROM Expenses WHERE idExpenses=?");
                 ps.setInt(1, code);
 
                 r = ps.executeUpdate();

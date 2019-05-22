@@ -71,8 +71,8 @@ public class MenuHairCutsClient extends javax.swing.JDialog {
             list.stream().sorted().forEach(hairCut -> {
                 fila[0] = String.valueOf(hairCut.getIdHairCut());
                 fila[1] = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(hairCut.getDate());
-                fila[2] = hairCut.getBarber().getLastName() + " " + hairCut.getBarber().getName();
-                fila[3] = hairCut.getCuts();
+                fila[2] = hairCut.getBarber().getLastName().toUpperCase() + " " + hairCut.getBarber().getName().toUpperCase();
+                fila[3] = hairCut.getCuts().toUpperCase();
                 fila[4] = String.valueOf("$ " + hairCut.getPrice());
 
                 dtm.addRow(fila);
